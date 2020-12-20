@@ -1,5 +1,5 @@
 languageCode: "en-us"
-baseUrl: ""
+baseUrl: "https://lsmenicucci.github.io/blog/"
 title: "Lucas Menicucci"
 theme: "anubis"
 paginate: 10
