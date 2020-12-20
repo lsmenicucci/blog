@@ -3,26 +3,26 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
-    <loc>/posts/first-post/</loc>
+    <loc>https://lsmenicucci.github.io/blog/posts/first-post/</loc>
     <lastmod>2020-12-20T17:58:37-03:00</lastmod>
   </url>
   
   <url>
-    <loc>/</loc>
+    <loc>https://lsmenicucci.github.io/blog/</loc>
     <lastmod>2020-12-20T17:58:37-03:00</lastmod>
   </url>
   
   <url>
-    <loc>/posts/</loc>
+    <loc>https://lsmenicucci.github.io/blog/posts/</loc>
     <lastmod>2020-12-20T17:58:37-03:00</lastmod>
   </url>
   
   <url>
-    <loc>/categories/</loc>
+    <loc>https://lsmenicucci.github.io/blog/categories/</loc>
   </url>
   
   <url>
-    <loc>/tags/</loc>
+    <loc>https://lsmenicucci.github.io/blog/tags/</loc>
   </url>
   
 </urlset>

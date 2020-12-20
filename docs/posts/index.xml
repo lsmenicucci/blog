@@ -2,21 +2,21 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Posts on Lucas Menicucci</title>
-    <link>/posts/</link>
+    <link>https://lsmenicucci.github.io/blog/posts/</link>
     <description>Lucas Menicucci (Posts)</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Sun, 20 Dec 2020 17:58:37 -0300</lastBuildDate>
     
-    <atom:link href="/posts/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://lsmenicucci.github.io/blog/posts/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>First Post</title>
-      <link>/posts/first-post/</link>
+      <link>https://lsmenicucci.github.io/blog/posts/first-post/</link>
       <pubDate>Sun, 20 Dec 2020 17:58:37 -0300</pubDate>
       
-      <guid>/posts/first-post/</guid>
+      <guid>https://lsmenicucci.github.io/blog/posts/first-post/</guid>
       <description>&lt;h1 id=&#34;hello-world&#34;&gt;Hello World!&lt;/h1&gt;
 &lt;p&gt;This is a test post, please don&amp;rsquo;t take it searious. I will insert some content here just to fill it up.&lt;/p&gt;
 &lt;h1 id=&#34;content&#34;&gt;Content&lt;/h1&gt;
