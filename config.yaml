@@ -6,6 +6,7 @@ paginate: 10
 disqusShortname: yourdiscussshortname
 googleAnalytics: UA-123-45
 enableRobotsTXT: true
+publishDir: "docs"
 
 menu:
   main:
