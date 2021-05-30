@@ -1,10 +1,8 @@
 ---
 title: "Stochastic Series Expansion: General Framework"
 date: 2021-05-30T00:09:27Z
-draft: True
+draft: False
 ---
-
-# Stochastic Series Expansion: General Framework
 
 ## Series Expansion
 
@@ -19,7 +17,7 @@ A possible approach could be obtained by approximately the exponential by a prod
 Instead we will make no approximations on to $H$, we begin the computation by expanding the exponential in Taylor series and inserting $n - 1$ identities between each $H$:
 $$
 \begin{align}
-Z &= \sum_{\psi_0} \left< \psi_0 \right| \left( \sum_{n = 0}^\infty \frac{(-\beta)^n}{n!} H^n \right) \left| \psi_0 \right> \\
+Z &= \sum_{\psi_0} \left< \psi_0 \right| \left( \sum_{n = 0}^\infty \frac{(-\beta)^n}{n!} H^n \right) \left| \psi_0 \right> \\\\\\
 &= \sum_{\psi_0} \left< \psi_0 \right| \left( \sum_{n = 0}^\infty \frac{(-\beta)^n}{n!} H \ \mathbb{1} \ H \dots aH \ 1\ H \right) \left| \psi_0 \right>
 \end{align}
 $$
@@ -28,16 +26,12 @@ Now each identity $\mathbb{1}$ can be replaced by an individual resolution $\mat
 $$
 \begin{align}
 Z &= \sum_{\psi_0} \left< \psi_0 \right| \left[
-	\sum_{n = 0}^\infty \frac{(-\beta)^n}{n!} ---
-title: "First Post"
-date: 2020-12-20T17:58:37-03:00
-draft: false
----
+	\sum_{n = 0}^\infty \frac{(-\beta)^n}{n!}
 	H \left( \sum_{\psi_1} \left| \psi_1 \right> \left< \psi_1 \right| \right)
 	H \left( \sum_{\psi_2} \left| \psi_2 \right> \left< \psi_2 \right| \right)
 	\dots
 	\left( \sum_{\psi_{n - 1}} \left| \psi_{n - 1} \right> \left< \psi_{n-1} \right| \right) H
-\right] \left| \psi_0 \right> \\
+\right] \left| \psi_0 \right> \\\\
  &= \sum_{n = 0}^\infty \frac{(-\beta)^n}{n!} \left[
  	\sum_{\psi_0} \left< \psi_0 \right|
 	H \left( \sum_{\psi_1} \left| \psi_1 \right> \left< \psi_1 \right| \right)
@@ -45,21 +39,21 @@ draft: false
 	\dots
 	\left( \sum_{\psi_{n - 1}} \left| \psi_{n - 1} \right> \left< \psi_{n-1} \right| \right) H
 	\left| \psi_0 \right>
-\right] \\
+\right] \\\\
 &= \sum_{n = 0}^\infty \frac{(-\beta)^n}{n!}
  	\sum_{\psi_0} \sum_{\psi_1} \dots \sum_{\psi_{n-1}} \left< \psi_0 \right|
 	H  \left| \psi_1 \right> \left< \psi_1 \right| 
 	H  \left| \psi_2 \right>
 	\dots
 	\left< \psi_{n - 1} \right|  H
-	\left| \psi_0 \right> \\
+	\left| \psi_0 \right> \\\\
 &= \sum_{n = 0}^\infty \frac{(-\beta)^n}{n!}
  	\sum_{\{\psi_k\}_0^{n - 1}} \left< \psi_0 \right|
 	H  \left| \psi_1 \right> \left< \psi_1 \right| 
 	H  \left| \psi_2 \right>
 	\dots
 	\left< \psi_{n - 1} \right|  H
-	\left| \psi_0 \right> \\
+	\left| \psi_0 \right> \\\\
 \end{align}
 $$
 Note now that we have finally now written the operators in term of matrix elements. Our partition function's expression could, in theory, be to express the transition probabilities required by the metropolis algorithm. However, we should point that the matrix elements on the above terms $\left< \psi_k \right|
@@ -74,7 +68,7 @@ Z &= \sum_{n = 0}^\infty \sum_{\{\psi_k\}_0^{n - 1}}
 	H  \left| \psi_2 \right>
 	\dots
 	\left< \psi_{n - 1} \right|  H
-	\left| \psi_0 \right> \\
+	\left| \psi_0 \right> \\\\
 \end{align}
 $$
 The "gotcha" here is that all this summations will be evaluated stochastically, even the expansion order. Normally in a metropolis simulation the sample/configuration space is the same as the state space while here we sample a random expansion order $n$ and also a set of $n$ states. We can further write each Hamiltonian as a sum of individual interactions. Suppose that we are dealing with two body interactions and each entity of out system is connected by a bond indexed by $b$, if we have multiple types of interactions we can index each type with a variable $t$. The Hamiltonian is written as a sum in interaction types and in bonds:
@@ -90,7 +84,7 @@ Z &= \sum_{n = 0}^\infty \sum_{\{\psi_k\}_0^{n - 1}}
 	\left( \sum_{t_1, b_1} H_{[t_1, b_1]} \right)  \left| \psi_2 \right>
 	\dots
 	\left< \psi_{n - 1} \right|  \left( \sum_{t_{n - 1}, b_{n - 1}} H_{[t_{n - 1}, b_{n - 1}]} \right)
-	\left| \psi_0 \right> \\
+	\left| \psi_0 \right> \\\\
 \end{align}
 $$
  Because each summation is independent, all the summations factor out and the sample term is now a sequence of operators
@@ -102,7 +96,7 @@ Z &= \sum_{n = 0}^\infty \sum_{\{\psi_k\}_0^{n - 1}} \sum_{\{t_m, b_m\}^{n - 1}_
 	H_{[t_1, b_1]}  \left| \psi_2 \right>
 	\dots
 	\left< \psi_{n - 1} \right| H_{[t_{n - 1}, b_{n - 1}]}
-	\left| \psi_0 \right> \\
+	\left| \psi_0 \right> \\\\
 \end{align}
 $$
 Note that we now sample not only on the order $n$ and the states $\{\psi_k\}$ but also on the type, bond pair $[t_m, b_m]$. This allow us to distinguish between different kinds of interactions which will be very useful when constructing the update schemes on an actual simulation. ]
@@ -112,9 +106,9 @@ Note that we now sample not only on the order $n$ and the states $\{\psi_k\}$ bu
 Now we will derive an (rather fancy) expression for the internal energy $\left< E \right>$. From the statistical mechanics theory, we can calculate the mean energy by differentiating $\ln Z$ in terms of $\beta$:
 $$
 \begin{align}
-\left< E \right> &= - \partial_{\beta} \ln Z \\
-&= \frac{1}{Z} \sum_{\psi_0} \left< \psi_0 \right| H e^{-\beta H} \left| \psi_0 \right> \\
-&= \frac{1}{Z} \sum_{\psi_0} \left< \psi_0 \right| H \left( \sum_{n = 0}^\infty \frac{(-\beta)^n}{n!} H^n \right) \left| \psi_0 \right> \\
+\left< E \right> &= - \partial_{\beta} \ln Z \\\\
+&= \frac{1}{Z} \sum_{\psi_0} \left< \psi_0 \right| H e^{-\beta H} \left| \psi_0 \right> \\\\
+&= \frac{1}{Z} \sum_{\psi_0} \left< \psi_0 \right| H \left( \sum_{n = 0}^\infty \frac{(-\beta)^n}{n!} H^n \right) \left| \psi_0 \right> \\\\
 \end{align}
 $$
 Note that the above trace summation is exactly the one in the beginning of our expansion of $Z$ but with an extra $H$. Carrying out the same procedure we arrive on to the following expression:
@@ -126,7 +120,7 @@ $$
 	H  \left| \psi_2 \right>
 	\dots
 	\left< \psi_{n - 1} \right| H \left| \psi_n \right>
-	\left< \psi_{n} \right| H \left| \psi_0 \right> \\
+	\left< \psi_{n} \right| H \left| \psi_0 \right> \\\\
 &= \frac{1}{Z} \sum_{n = 0}^\infty \frac{(-\beta)^n}{n!}
  	\sum_{\{\psi_k\}_0^{n}} \left< \psi_0 \right|
 	H  \left| \psi_1 \right> \left< \psi_1 \right| 
@@ -162,7 +156,7 @@ $$
 	H  \left| \psi_2 \right>
 	\dots
 	\left< \psi_{n - 1} \right| H 
-	\left| \psi_0 \right> \\
+	\left| \psi_0 \right> \\\\
 &= \frac{1}{Z} \sum_{n = 0}^\infty \sum_{\{\psi_k\}_0^{n - 1}}
 	\frac{(-\beta)^n}{n!}
  	\left< \psi_0 \right|
@@ -170,7 +164,7 @@ $$
 		H  \left| \psi_2 \right>
 		\dots
 		\left< \psi_{n - 1} \right| H 
-	\left| \psi_0 \right>  \frac{n}{(-\beta)} \\
+	\left| \psi_0 \right>  \frac{n}{(-\beta)} \\\\
 &= - \frac{\left< n \right>}{\beta}
 \end{align}
 $$
@@ -189,7 +183,7 @@ $$
 The $(-\beta)^n/n!$ factor can be absorbed as a weight present on the denominator $Z$ and the remaining product ensures that the series terms is zeros whenever n is less than $k - 1$ so that we can include those terms in the summation in order to fix the starting series index. We end up with:
 $$
 \begin{align}
-\partial^k_{(-\beta)} \ln Z &= \frac{1}{Z} \partial^k_{(-\beta)}Z \\
+\partial^k_{(-\beta)} \ln Z &= \frac{1}{Z} \partial^k_{(-\beta)}Z \\\\
 &= \frac{\left< n \ (n - 1) \dots (n - k + 1) \right>}{(-\beta)^k}
 \end{align}
 $$
