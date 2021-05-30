@@ -1,7 +1,7 @@
 ---
 title: "Stochastic Series Expansion: General Framework"
 date: 2021-05-30T00:09:27Z
-draft: False
+draft: false
 ---
 
 ## Series Expansion
@@ -18,7 +18,7 @@ Instead we will make no approximations on to $H$, we begin the computation by ex
 $$
 \begin{align}
 Z &= \sum_{\psi_0} \left< \psi_0 \right| \left( \sum_{n = 0}^\infty \frac{(-\beta)^n}{n!} H^n \right) \left| \psi_0 \right> \\\\\\
-&= \sum_{\psi_0} \left< \psi_0 \right| \left( \sum_{n = 0}^\infty \frac{(-\beta)^n}{n!} H \ \mathbb{1} \ H \dots aH \ 1\ H \right) \left| \psi_0 \right>
+&= \sum_{\psi_0} \left< \psi_0 \right| \left( \sum_{n = 0}^\infty \frac{(-\beta)^n}{n!} H \ \mathbb{1} \ H \dots H \ \mathbb{1} \ H \right) \left| \psi_0 \right>
 \end{align}
 $$
 
