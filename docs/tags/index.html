@@ -44,7 +44,7 @@
 
 
     
-        <link rel="stylesheet" href="https://lsmenicucci.github.io/blog/css/my.css?rnd=1610651520">
+        <link rel="stylesheet" href="https://lsmenicucci.github.io/blog/css/my.css?rnd=1622337597">
     
 
 
@@ -57,15 +57,14 @@
 
 
     
-        <script src="https://lsmenicucci.github.io/blog/js/main.js?rnd=1610651520" type="text/javascript" charset="utf-8"></script>
+        <script src="https://lsmenicucci.github.io/blog/js/main.js?rnd=1622337597" type="text/javascript" charset="utf-8"></script>
     
 
 
 <meta property="og:title" content="Tags" />
 <meta property="og:description" content="" />
 <meta property="og:type" content="website" />
-<meta property="og:url" content="https://lsmenicucci.github.io/blog/tags/" />
-<meta property="og:image" content="https://lsmenicucci.github.io/blog/images/og-featured.png"/>
+<meta property="og:url" content="https://lsmenicucci.github.io/blog/tags/" /><meta property="og:image" content="https://lsmenicucci.github.io/blog/images/og-featured.png"/>
 
 
 <meta name="twitter:card" content="summary_large_image"/>
@@ -89,16 +88,33 @@
     <div class="container">
         <header class="common-header"> 
             
-                <h1 class="site-title">
-    <a href="/blog">Lucas Menicucci</a>
-</h1>
+                <script>
+  MathJax = {
+    tex: {
+      inlineMath: [['$', '$']],
+      displayMath: [['$$','$$']],
+      processEscapes: true,
+      processEnvironments: true
+    },
+    options: {
+      skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+    },
+    CommonHTML: {
+        linebreaks: {
+            automatic: true
+        }
+    }
+  };
 
-    <nav>
-        
-        
-        <a class="" href="https://lsmenicucci.github.io/blog/posts/" title="Archive">Archive</a>
-        
-    </nav>
+  window.addEventListener('load', (event) => {
+      document.querySelectorAll("mjx-container").forEach(function(x){
+        x.parentElement.classList += 'has-jax'})
+    });
+
+</script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script type="text/javascript" id="MathJax-script" async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
 
             

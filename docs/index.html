@@ -3,7 +3,7 @@
 
 <html lang="en-us" data-theme="">
 <head>
-	<meta name="generator" content="Hugo 0.68.3" />
+	<meta name="generator" content="Hugo 0.82.0" />
     
         
 <meta charset="utf-8">
@@ -45,7 +45,7 @@
 
 
     
-        <link rel="stylesheet" href="https://lsmenicucci.github.io/blog/css/my.css?rnd=1610651520">
+        <link rel="stylesheet" href="https://lsmenicucci.github.io/blog/css/my.css?rnd=1622337597">
     
 
 
@@ -58,16 +58,15 @@
 
 
     
-        <script src="https://lsmenicucci.github.io/blog/js/main.js?rnd=1610651520" type="text/javascript" charset="utf-8"></script>
+        <script src="https://lsmenicucci.github.io/blog/js/main.js?rnd=1622337597" type="text/javascript" charset="utf-8"></script>
     
 
 
 <meta property="og:title" content="Lucas Menicucci" />
 <meta property="og:description" content="" />
 <meta property="og:type" content="website" />
-<meta property="og:url" content="https://lsmenicucci.github.io/blog/" />
-<meta property="og:image" content="https://lsmenicucci.github.io/blog/images/og-featured.png"/>
-<meta property="og:updated_time" content="2021-01-14T12:23:06-03:00" />
+<meta property="og:url" content="https://lsmenicucci.github.io/blog/" /><meta property="og:image" content="https://lsmenicucci.github.io/blog/images/og-featured.png"/>
+
 
 <meta name="twitter:card" content="summary_large_image"/>
 <meta name="twitter:image" content="https://lsmenicucci.github.io/blog/images/og-featured.png"/>
@@ -90,16 +89,33 @@
     <div class="container">
         <header class="common-header"> 
             
-                <h1 class="site-title">
-    <a href="/blog">Lucas Menicucci</a>
-</h1>
+                <script>
+  MathJax = {
+    tex: {
+      inlineMath: [['$', '$']],
+      displayMath: [['$$','$$']],
+      processEscapes: true,
+      processEnvironments: true
+    },
+    options: {
+      skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+    },
+    CommonHTML: {
+        linebreaks: {
+            automatic: true
+        }
+    }
+  };
 
-    <nav>
-        
-        
-        <a class="" href="https://lsmenicucci.github.io/blog/posts/" title="Archive">Archive</a>
-        
-    </nav>
+  window.addEventListener('load', (event) => {
+      document.querySelectorAll("mjx-container").forEach(function(x){
+        x.parentElement.classList += 'has-jax'})
+    });
+
+</script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script type="text/javascript" id="MathJax-script" async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
 
             
@@ -114,11 +130,11 @@
     
         <article class="post-list">
     <header class="post-header">
-        <h1 class="post-title"><a href="/blog/posts/xxy-1/">XXY Model: The Six Vertex model solution</a></h1>
+        <h1 class="post-title"><a href="/blog/posts/stochastic-series-expansion-general-framework/">Stochastic Series Expansion: General Framework</a></h1>
     </header>
 
     <div class="content post-summary">
-        This is the begining of a sequence of studies about the XXY model. Of course, one should note that we will not be ttalking about the XXY model in this first post and that the title seems somewhat missleading. However, there is a deep connection between those models and the analitical results for the Six Vertex model will gain a great importance once the connection is elucidated. With that in mind, we can concentract ourselves on the analitical features of this model and take a step at the time.
+        Series Expansion We begin introducing the fundamentals behind the stochastic series expansion. On to the definition of the partition function of a quantum system, we immediately find ourselves in front of a hairy problem: $$ Z = Tr \ e^{-\beta H} $$ The computation of that trace above requires the knowledge of the whole set of eigenstates of the operator H (and hence, of $e^{\beta H} $). Remember that we are generally dealing with a system with a large scale of interacting entities, diagonalizing such systems is a hard problem even for the simpler models!
     </div>
     
     
@@ -129,35 +145,7 @@
 
 <div class="post-info">
     
-        <div class="post-date">14.01.2021</div>
-    
-    <div class="post-taxonomies">
-        
-            
-    </div>
-</div>
-
-</article>
-    
-        <article class="post-list">
-    <header class="post-header">
-        <h1 class="post-title"><a href="/blog/posts/first-post/">First Post</a></h1>
-    </header>
-
-    <div class="content post-summary">
-        Hello World! This is a test post, please don&rsquo;t take it searious. I will insert some content here just to fill it up.
-Content Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla imperdiet dolor venenatis, tincidunt ipsum sed, lacinia ex. Integer ut nisl pharetra, hendrerit dolor nec, imperdiet diam. Ut id ex ut ex rhoncus viverra finibus nec libero. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec sed vulputate erat, aliquet varius lectus.
-    </div>
-    
-    
-    
-
-    
-
-
-<div class="post-info">
-    
-        <div class="post-date">20.12.2020</div>
+        <div class="post-date">30.05.2021</div>
     
     <div class="post-taxonomies">
         
