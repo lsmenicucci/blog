@@ -268,7 +268,7 @@ $$
 c_v = Var[n] - E[n]
 $$
 
-## Series Truncation
+## Series Truncation (WIP)
 
 Theoretically, the order summation in $Z$ goes to infinity. 
 
