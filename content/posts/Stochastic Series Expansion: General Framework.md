@@ -8,7 +8,7 @@ We seek to establish the basic mathematical grounding for simulating thermodynam
 
 The developed content was produced from my notes when studding the amazing "Computational Studies of Quantum Spin Systems" from Sandvik[^2] which were a fantastic guide to this topic. Thanks, Sandvik!
 
-## Series Expansion
+## Expanding the exponential
 
 We begin introducing the fundamentals behind the stochastic series expansion. On to the definition of the partition function of a quantum system, we immediately find ourselves in front of a hairy problem:
 $$
@@ -76,7 +76,11 @@ Z &= \sum_{n = 0}^\infty \sum_{\{\psi_k\}_0^{n - 1}}
 	\left| \psi_0 \right> \\\\
 \end{align}
 $$
-The "gotcha" here is that all this summations will be evaluated stochastically, even the expansion order. Normally in a metropolis simulation the sample/configuration space is the same as the state space while here we sample a random expansion order $n$ and also a set of $n$ states. We can further write each Hamiltonian as a sum of individual interactions. Suppose that we are dealing with two body interactions and each entity of out system is connected by a bond indexed by $b$, if we have multiple types of interactions we can index each type with a variable $t$. The Hamiltonian is written as a sum in interaction types and in bonds:
+The "gotcha" here is that all this summations will be evaluated stochastically, even the expansion order. Normally in a metropolis simulation the sample/configuration space is the same as the state space while here we sample a random expansion order $n$ and also a set of $n$ states. 
+
+## Sampling on Hamiltonian terms
+
+We can further write each Hamiltonian as a sum of individual interactions. Suppose that we are dealing with two body interactions and each entity of out system is connected by a bond indexed by $b$, if we have multiple types of interactions we can index each type with a variable $t$. The Hamiltonian is written as a sum in interaction types and in bonds:
 $$
 H = \sum_{t, b} H_{[t, b]}
 $$
@@ -106,9 +110,21 @@ Z &= \sum_{n = 0}^\infty \sum_{\{\psi_k\}_0^{n - 1}} \sum_{\{t_m, b_m\}^{n - 1}_
 $$
 Note that we now sample not only on the order $n$ and the states $\{\psi_k\}$ but also on the type, bond pair $[t_m, b_m]$. This allow us to distinguish between different kinds of interactions which will be very useful when constructing the update schemes on an actual simulation. 
 
-## Internal Energy
+## Measuring physical observables
 
-Now we will derive an (rather fancy) expression for the internal energy $\left< E \right>$. From the statistical mechanics theory, we can calculate the mean energy by differentiating $\ln Z$ in terms of $\beta$:
+If you've read the last section, than you realized that we can also sample under $H$ terms. For the sake of simplicity, will not include the extra summation on the internal energy and heat capacity estimators deviation. The resulting formulas still valid if the bond $H_{[t, b]}$ were sampled stochastically, and can easy be verified by a substitution of
+$$
+H = \sum_{\{t_m, b_m\}} H_{[t_m, b_m]}
+$$
+right before the identification of the ratio of summations with a thermal average $\left< \dots\right>$. Also, a new argument on the weights should be included as they now depend on the type and bond of the sampled operators:
+$$
+W_n(\{\psi_k\}) \rightarrow W_n(\{\psi_k\}, \{t_m, b_m\})
+$$
+
+
+### Internal Energy
+
+The expression for the internal energy $\left< E \right>$ is a rather fancy one. From the statistical mechanics theory, we can calculate the mean energy by differentiating $\ln Z$ in terms of $\beta$:
 $$
 \begin{align}
 \left< E \right> &= - \partial_{\beta} \ln Z \\\\
@@ -188,7 +204,7 @@ $$
 $$
 The above expression tels us that $n/\beta$ can be interpreted as an estimator of $E$ if the above weights are positive (and can be viewed as unnormalized probabilities).
 
-## Heat Capacity
+### Heat Capacity
 
 For deriving an expression for the heat capacity, lets us begin writing its definition in terms of the partition function:
 $$
@@ -268,9 +284,21 @@ $$
 c_v = Var[n] - E[n]
 $$
 
-## Series Truncation (WIP)
+## Truncating the series (WIP)
 
-Theoretically, the order summation in $Z$ goes to infinity. 
+Every formula derived until here could be perfectly used to compute the macroscopic properties of quantum system by the means of a computer. However, one should point out the corresponding data structure used as the "current configuration" on the context of a metropolis simulation. The procedure followed on that algorithm consists on constantly updating an actual configuration according to random moves obeying some transitions probabilities. If that probabilities had correctly chosen, we are them guarantied that the sampled configuration follows the equilibrium distribution and statistical measurements can be made using the generated configuration. Because of the constantly updates on the current configuration, we may choose a data structure that can afford such often write operations. Lets check on a table what are the variables that describe a sampled configuration on the SSE framework:
+
+| **Configuration/Sampled variable**                           | Data size |
+| ------------------------------------------------------------ | --------- |
+| $n$                                                          | $1$       |
+| set of states $\{\psi_k\}$                                   | $n$       |
+| string of operators $\prod_k \left< \psi_k\right| H_k \left| \psi_{k + 1}\right>$ | $n$       |
+| type of each operator $H_{[t_k, b_k]} \rightarrow t_k$       | $n$       |
+| bond of each operator $H_{[t_k, b_k]} \rightarrow b_k$       | $n$       |
+
+Note that there are 3 quantities whose size may vary with the expansion order $n$. Thats because the operators string is constantly growing/shrinking as we update $n$. Obviously we could use a list as a data structure when implementing that because of the mutable size. But mutable size is not a preferably approach when considering performance costs (not only they have linear access time but the data is not stored contiguously in memory). When designing high performance simulations we should try to keep data as compactly as possible and minimize the access time across by storing it contiguously. Also, not having to rely on constant copies operations or rewrites is something to keep in mind.
+
+Notice that we do not expect our simulation to walk much farther than the mean $\left<n\right>$ so that truncating the series expansions on a maximum $L > n_{max}$ would enable us to use a vector data structure for the above three sampled quantities. The maximum size $L$ should be calculated by fixing the simulation parameters (such as $\beta$), evaluating the mean $\left< n \right>$ and resizing to the new size $L \rightarrow \alpha \left< n\right>$ where something like $\alpha = 1.3$ should do it. 
 
 [^1]: [Stochastic series expansion method with operator-loop update](https://journals.aps.org/prb/abstract/10.1103/PhysRevB.59.R14157)
 [^2]: [Computational Studies of Quantum Spin Systems](https://aip.scitation.org/doi/abs/10.1063/1.3518900)

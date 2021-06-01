@@ -19,7 +19,7 @@
       <guid>https://lsmenicucci.github.io/blog/posts/stochastic-series-expansion-general-framework/</guid>
       <description>&lt;p&gt;We seek to establish the basic mathematical grounding for simulating thermodynamic quantities of many-body quantum systems. Specifically, we aim to implement a program that can simulate spin-1/2 systems. For accomplishing that task, I&amp;rsquo;ve chooses to work with the stochastic series expansion framework which will end up being implemented on top of a metropolis algorithm together with loop updates&lt;sup id=&#34;fnref:1&#34;&gt;&lt;a href=&#34;#fn:1&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;1&lt;/a&gt;&lt;/sup&gt;.&lt;/p&gt;
 &lt;p&gt;The developed content was produced from my notes when studding the amazing &amp;ldquo;Computational Studies of Quantum Spin Systems&amp;rdquo; from Sandvik&lt;sup id=&#34;fnref:2&#34;&gt;&lt;a href=&#34;#fn:2&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;2&lt;/a&gt;&lt;/sup&gt; which were a fantastic guide to this topic. Thanks, Sandvik!&lt;/p&gt;
-&lt;h2 id=&#34;series-expansion&#34;&gt;Series Expansion&lt;/h2&gt;
+&lt;h2 id=&#34;expanding-the-exponential&#34;&gt;Expanding the exponential&lt;/h2&gt;
 &lt;p&gt;We begin introducing the fundamentals behind the stochastic series expansion. On to the definition of the partition function of a quantum system, we immediately find ourselves in front of a hairy problem:
 $$
 Z = Tr \ e^{-\beta H}
@@ -82,7 +82,9 @@ H  \left| \psi_2 \right&amp;gt;
 \left| \psi_0 \right&amp;gt; \\&lt;br&gt;
 \end{align}
 $$
-The &amp;ldquo;gotcha&amp;rdquo; here is that all this summations will be evaluated stochastically, even the expansion order. Normally in a metropolis simulation the sample/configuration space is the same as the state space while here we sample a random expansion order $n$ and also a set of $n$ states. We can further write each Hamiltonian as a sum of individual interactions. Suppose that we are dealing with two body interactions and each entity of out system is connected by a bond indexed by $b$, if we have multiple types of interactions we can index each type with a variable $t$. The Hamiltonian is written as a sum in interaction types and in bonds:
+The &amp;ldquo;gotcha&amp;rdquo; here is that all this summations will be evaluated stochastically, even the expansion order. Normally in a metropolis simulation the sample/configuration space is the same as the state space while here we sample a random expansion order $n$ and also a set of $n$ states.&lt;/p&gt;
+&lt;h2 id=&#34;sampling-on-hamiltonian-terms&#34;&gt;Sampling on Hamiltonian terms&lt;/h2&gt;
+&lt;p&gt;We can further write each Hamiltonian as a sum of individual interactions. Suppose that we are dealing with two body interactions and each entity of out system is connected by a bond indexed by $b$, if we have multiple types of interactions we can index each type with a variable $t$. The Hamiltonian is written as a sum in interaction types and in bonds:
 $$
 H = \sum_{t, b} H_{[t, b]}
 $$
@@ -111,8 +113,17 @@ H_{[t_1, b_1]}  \left| \psi_2 \right&amp;gt;
 \end{align}
 $$
 Note that we now sample not only on the order $n$ and the states ${\psi_k}$ but also on the type, bond pair $[t_m, b_m]$. This allow us to distinguish between different kinds of interactions which will be very useful when constructing the update schemes on an actual simulation.&lt;/p&gt;
-&lt;h2 id=&#34;internal-energy&#34;&gt;Internal Energy&lt;/h2&gt;
-&lt;p&gt;Now we will derive an (rather fancy) expression for the internal energy $\left&amp;lt; E \right&amp;gt;$. From the statistical mechanics theory, we can calculate the mean energy by differentiating $\ln Z$ in terms of $\beta$:
+&lt;h2 id=&#34;measuring-physical-observables&#34;&gt;Measuring physical observables&lt;/h2&gt;
+&lt;p&gt;If you&amp;rsquo;ve read the last section, than you realized that we can also sample under $H$ terms. For the sake of simplicity, will not include the extra summation on the internal energy and heat capacity estimators deviation. The resulting formulas still valid if the bond $H_{[t, b]}$ were sampled stochastically, and can easy be verified by a substitution of
+$$
+H = \sum_{{t_m, b_m}} H_{[t_m, b_m]}
+$$
+right before the identification of the ratio of summations with a thermal average $\left&amp;lt; \dots\right&amp;gt;$. Also, a new argument on the weights should be included as they now depend on the type and bond of the sampled operators:
+$$
+W_n({\psi_k}) \rightarrow W_n({\psi_k}, {t_m, b_m})
+$$&lt;/p&gt;
+&lt;h3 id=&#34;internal-energy&#34;&gt;Internal Energy&lt;/h3&gt;
+&lt;p&gt;The expression for the internal energy $\left&amp;lt; E \right&amp;gt;$ is a rather fancy one. From the statistical mechanics theory, we can calculate the mean energy by differentiating $\ln Z$ in terms of $\beta$:
 $$
 \begin{align}
 \left&amp;lt; E \right&amp;gt; &amp;amp;= - \partial_{\beta} \ln Z \\&lt;br&gt;
@@ -191,7 +202,7 @@ $$
 \left&amp;lt; E \right&amp;gt; = -\frac{\left&amp;lt; n \right&amp;gt;}{\beta}
 $$
 The above expression tels us that $n/\beta$ can be interpreted as an estimator of $E$ if the above weights are positive (and can be viewed as unnormalized probabilities).&lt;/p&gt;
-&lt;h2 id=&#34;heat-capacity&#34;&gt;Heat Capacity&lt;/h2&gt;
+&lt;h3 id=&#34;heat-capacity&#34;&gt;Heat Capacity&lt;/h3&gt;
 &lt;p&gt;For deriving an expression for the heat capacity, lets us begin writing its definition in terms of the partition function:
 $$
 \begin{align}
@@ -267,8 +278,40 @@ Again, note that we made no assumptions about the nature of $H$ to arrive at thi
 $$
 c_v = Var[n] - E[n]
 $$&lt;/p&gt;
-&lt;h2 id=&#34;series-truncation&#34;&gt;Series Truncation&lt;/h2&gt;
-&lt;p&gt;Theoretically, the order summation in $Z$ goes to infinity.&lt;/p&gt;
+&lt;h2 id=&#34;truncating-the-series-wip&#34;&gt;Truncating the series (WIP)&lt;/h2&gt;
+&lt;p&gt;Every formula derived until here could be perfectly used to compute the macroscopic properties of quantum system by the means of a computer. However, one should point out the corresponding data structure used as the &amp;ldquo;current configuration&amp;rdquo; on the context of a metropolis simulation. The procedure followed on that algorithm consists on constantly updating an actual configuration according to random moves obeying some transitions probabilities. If that probabilities had correctly chosen, we are them guarantied that the sampled configuration follows the equilibrium distribution and statistical measurements can be made using the generated configuration. Because of the constantly updates on the current configuration, we may choose a data structure that can afford such often write operations. Lets check on a table what are the variables that describe a sampled configuration on the SSE framework:&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;&lt;strong&gt;Configuration/Sampled variable&lt;/strong&gt;&lt;/th&gt;
+&lt;th&gt;Data size&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;$n$&lt;/td&gt;
+&lt;td&gt;$1$&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;set of states ${\psi_k}$&lt;/td&gt;
+&lt;td&gt;$n$&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;string of operators $\prod_k \left&amp;lt; \psi_k\right&lt;/td&gt;
+&lt;td&gt;H_k \left&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;type of each operator $H_{[t_k, b_k]} \rightarrow t_k$&lt;/td&gt;
+&lt;td&gt;$n$&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;bond of each operator $H_{[t_k, b_k]} \rightarrow b_k$&lt;/td&gt;
+&lt;td&gt;$n$&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;Note that there are 3 quantities whose size may vary with the expansion order $n$. Thats because the operators string is constantly growing/shrinking as we update $n$. Obviously we could use a list as a data structure when implementing that because of the mutable size. But mutable size is not a preferably approach when considering performance costs (not only they have linear access time but the data is not stored contiguously in memory). When designing high performance simulations we should try to keep data as compactly as possible and minimize the access time across by storing it contiguously. Also, not having to rely on constant copies operations or rewrites is something to keep in mind.&lt;/p&gt;
+&lt;p&gt;Notice that we do not expect our simulation to walk much farther than the mean $\left&amp;lt;n\right&amp;gt;$ so that truncating the series expansions on a maximum $L &amp;gt; n_{max}$ would enable us to use a vector data structure for the above three sampled quantities. The maximum size $L$ should be calculated by fixing the simulation parameters (such as $\beta$), evaluating the mean $\left&amp;lt; n \right&amp;gt;$ and resizing to the new size $L \rightarrow \alpha \left&amp;lt; n\right&amp;gt;$ where something like $\alpha = 1.3$ should do it.&lt;/p&gt;
 &lt;section class=&#34;footnotes&#34; role=&#34;doc-endnotes&#34;&gt;
 &lt;hr&gt;
 &lt;ol&gt;
