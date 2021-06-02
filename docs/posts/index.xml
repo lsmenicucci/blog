@@ -60,7 +60,7 @@ H  \left| \psi_2 \right&amp;gt;
 \left&amp;lt; \psi_{n - 1} \right|  H
 \left| \psi_0 \right&amp;gt; \\&lt;br&gt;
 &amp;amp;= \sum_{n = 0}^\infty \frac{(-\beta)^n}{n!}
-\sum_{{\psi_k}_0^{n - 1}} \left&amp;lt; \psi_0 \right|
+\sum_{\{\psi_k\}_0^{n - 1}} \left&amp;lt; \psi_0 \right|
 H  \left| \psi_1 \right&amp;gt; \left&amp;lt; \psi_1 \right|
 H  \left| \psi_2 \right&amp;gt;
 \dots
@@ -73,7 +73,7 @@ H  \left| \psi_{k + 1} \right&amp;gt;$ are not positive in general. This could e
 &lt;p&gt;Finally we will move the states summation next to the expansion order, which gives us the following form:
 $$
 \begin{align}
-Z &amp;amp;= \sum_{n = 0}^\infty \sum_{{\psi_k}_0^{n - 1}}
+Z &amp;amp;= \sum_{n = 0}^\infty \sum_{\{\psi_k\}_0^{n - 1}}
 \frac{(-\beta)^n}{n!} \left&amp;lt; \psi_0 \right|
 H  \left| \psi_1 \right&amp;gt; \left&amp;lt; \psi_1 \right|
 H  \left| \psi_2 \right&amp;gt;
@@ -91,7 +91,7 @@ $$
 Each term $H_{[t,b]}$ could represent, for instance, an exchange term between two adjacent spins $H_{1, b} = S_{i(b)}S_{j(b)}$ where  both $i(b)$ and $j(b)$ maps the bond to the corresponding sites and the $t = 1$ would represent an exchange interaction type. Substituting the above expression into the last expression for $Z$ we have:
 $$
 \begin{align}
-Z &amp;amp;= \sum_{n = 0}^\infty \sum_{{\psi_k}_0^{n - 1}}
+Z &amp;amp;= \sum_{n = 0}^\infty \sum_{\{\psi_k\}_0^{n - 1}}
 \frac{(-\beta)^n}{n!} \left&amp;lt; \psi_0 \right|
 \left( \sum_{t_0, b_0} H_{[t_0, b_0]} \right)  \left| \psi_1 \right&amp;gt; \left&amp;lt; \psi_1 \right|
 \left( \sum_{t_1, b_1} H_{[t_1, b_1]} \right)  \left| \psi_2 \right&amp;gt;
@@ -103,7 +103,7 @@ $$
 Because each summation is independent, all the summations factor out and the sampled term is now a sequence of operators
 $$
 \begin{align}
-Z &amp;amp;= \sum_{n = 0}^\infty \sum_{{\psi_k}_0^{n - 1}} \sum_{{t_m, b_m}^{n - 1}_0 }
+Z &amp;amp;= \sum_{n = 0}^\infty \sum_{\{\psi_k\}_0^{n - 1}} \sum_{\{t_m, b_m\}^{n - 1}_0 }
 \frac{(-\beta)^n}{n!} \left&amp;lt; \psi_0 \right|
 H_{[t_0, b_0]} \left| \psi_1 \right&amp;gt; \left&amp;lt; \psi_1 \right|
 H_{[t_1, b_1]}  \left| \psi_2 \right&amp;gt;
@@ -112,15 +112,15 @@ H_{[t_1, b_1]}  \left| \psi_2 \right&amp;gt;
 \left| \psi_0 \right&amp;gt; \\&lt;br&gt;
 \end{align}
 $$
-Note that we now sample not only on the order $n$ and the states ${\psi_k}$ but also on the type, bond pair $[t_m, b_m]$. This allow us to distinguish between different kinds of interactions which will be very useful when constructing the update schemes on an actual simulation.&lt;/p&gt;
+Note that we now sample not only on the order $n$ and the states $\{\psi_k\}$ but also on the type, bond pair $[t_m, b_m]$. This allow us to distinguish between different kinds of interactions which will be very useful when constructing the update schemes on an actual simulation.&lt;/p&gt;
 &lt;h2 id=&#34;measuring-physical-observables&#34;&gt;Measuring physical observables&lt;/h2&gt;
 &lt;p&gt;If you&amp;rsquo;ve read the last section, than you realized that we can also sample under $H$ terms. For the sake of simplicity, will not include the extra summation on the internal energy and heat capacity estimators deviation. The resulting formulas still valid if the bond $H_{[t, b]}$ were sampled stochastically, and can easy be verified by a substitution of
 $$
-H = \sum_{{t_m, b_m}} H_{[t_m, b_m]}
+H = \sum_{\{t_m, b_m\}} H_{[t_m, b_m]}
 $$
 right before the identification of the ratio of summations with a thermal average $\left&amp;lt; \dots\right&amp;gt;$. Also, a new argument on the weights should be included as they now depend on the type and bond of the sampled operators:
 $$
-W_n({\psi_k}) \rightarrow W_n({\psi_k}, {t_m, b_m})
+W_n(\{\psi_k\}) \rightarrow W_n(\{\psi_k\}, \{t_m, b_m\})
 $$&lt;/p&gt;
 &lt;h3 id=&#34;internal-energy&#34;&gt;Internal Energy&lt;/h3&gt;
 &lt;p&gt;The expression for the internal energy $\left&amp;lt; E \right&amp;gt;$ is a rather fancy one. From the statistical mechanics theory, we can calculate the mean energy by differentiating $\ln Z$ in terms of $\beta$:
@@ -142,7 +142,7 @@ H  \left| \psi_2 \right&amp;gt;
 \left&amp;lt; \psi_{n - 1} \right| H \left| \psi_n \right&amp;gt;
 \left&amp;lt; \psi_{n} \right| H \left| \psi_0 \right&amp;gt; \\&lt;br&gt;
 &amp;amp;= \frac{1}{Z} \sum_{n = 0}^\infty \frac{(-\beta)^n}{n!}
-\sum_{{\psi_k}_0^{n}} \left&amp;lt; \psi_0 \right|
+\sum_{\{\psi_k\}_0^{n}} \left&amp;lt; \psi_0 \right|
 H  \left| \psi_1 \right&amp;gt; \left&amp;lt; \psi_1 \right|
 H  \left| \psi_2 \right&amp;gt;
 \dots
@@ -154,7 +154,7 @@ But with an extra summation and an extra matrix element on the product. In total
 $$
 \begin{align}
 \left&amp;lt; E \right&amp;gt;= \frac{1}{Z} \sum_{m = 1}^\infty \frac{(-\beta)^{m - 1}}{(m - 1)!}
-\sum_{{\psi_k}_0^{m - 1}} \left&amp;lt; \psi_0 \right|
+\sum_{\{\psi_k\}_0^{m - 1}} \left&amp;lt; \psi_0 \right|
 H  \left| \psi_1 \right&amp;gt; \left&amp;lt; \psi_1 \right|
 H  \left| \psi_2 \right&amp;gt;
 \dots
@@ -171,13 +171,13 @@ $$
 \begin{align}
 \left&amp;lt; E \right&amp;gt; &amp;amp;= \frac{1}{Z} \sum_{m = 0}^\infty \frac{(-\beta)^m}{m!}
 \frac{m}{(-\beta)}
-\sum_{{\psi_k}_0^{m - 1}} \left&amp;lt; \psi_0 \right|
+\sum_{\{\psi_k\}_0^{m - 1}} \left&amp;lt; \psi_0 \right|
 H  \left| \psi_1 \right&amp;gt; \left&amp;lt; \psi_1 \right|
 H  \left| \psi_2 \right&amp;gt;
 \dots
 \left&amp;lt; \psi_{m - 1} \right| H
 \left| \psi_0 \right&amp;gt; \\&lt;br&gt;
-&amp;amp;= \frac{1}{Z} \sum_{m = 0}^\infty \sum_{{\psi_k}_0^{m - 1}}
+&amp;amp;= \frac{1}{Z} \sum_{m = 0}^\infty \sum_{\{\psi_k\}_0^{m - 1}}
 \frac{(-\beta)^m}{m!}
 \left&amp;lt; \psi_0 \right|
 H  \left| \psi_1 \right&amp;gt; \left&amp;lt; \psi_1 \right|
@@ -185,7 +185,7 @@ H  \left| \psi_2 \right&amp;gt;
 \dots
 \left&amp;lt; \psi_{m - 1} \right| H
 \left| \psi_0 \right&amp;gt;  \frac{m}{(-\beta)} \\&lt;br&gt;
-&amp;amp;= \frac{1}{Z} \sum_{n = 0}^\infty \sum_{{\psi_k}_0^{n - 1}}
+&amp;amp;= \frac{1}{Z} \sum_{n = 0}^\infty \sum_{\{\psi_k\}_0^{n - 1}}
 \underbrace{
 \frac{(-\beta)^n}{n!}
 \left&amp;lt; \psi_0 \right|
@@ -193,11 +193,11 @@ H  \left| \psi_1 \right&amp;gt; \left&amp;lt; \psi_1 \right|
 H  \left| \psi_2 \right&amp;gt;
 \dots
 \left&amp;lt; \psi_{n - 1} \right| H
-\left| \psi_0 \right&amp;gt;}_{W_n({\psi_k})}  \frac{n}{(-\beta)} \\&lt;br&gt;
+\left| \psi_0 \right&amp;gt;}_{W_n(\{\psi_k\})}  \frac{n}{(-\beta)} \\&lt;br&gt;
 &amp;amp;= - \frac{\left&amp;lt; n \right&amp;gt;}{\beta}
 \end{align}
 $$
-Where we renamed $m \rightarrow n$ from the second to the third line only for sake of notation (the symbol used has no importance, instead we should refer to this quantity always as the expansion order). Also note that the weight $W_n({\psi_k})$ is the exactly the summation term of $Z$. This is in fact the probability weight we will use on our simulation, but for now let us delight ourselves with the fancy expression that we arrived
+Where we renamed $m \rightarrow n$ from the second to the third line only for sake of notation (the symbol used has no importance, instead we should refer to this quantity always as the expansion order). Also note that the weight $W_n(\{\psi_k\})$ is the exactly the summation term of $Z$. This is in fact the probability weight we will use on our simulation, but for now let us delight ourselves with the fancy expression that we arrived
 $$
 \left&amp;lt; E \right&amp;gt; = -\frac{\left&amp;lt; n \right&amp;gt;}{\beta}
 $$
@@ -224,40 +224,40 @@ You can follow the described sequence in the following steps (notice that we onl
 $$
 \begin{align}
 \frac{1}{Z}\partial^q_\beta Z &amp;amp;= \frac{1}{Z} \partial^q_\beta \left(
-\sum_{n = 0}^\infty \sum_{{\psi_k}_0^{n}} \frac{(-\beta)^n}{n!}
+\sum_{n = 0}^\infty \sum_{\{\psi_k\}_0^{n}} \frac{(-\beta)^n}{n!}
 \prod_{k} \left&amp;lt; \psi_k \right| H  \left| \psi_{k + 1} \right&amp;gt;
 \right) \\&lt;br&gt;
 &amp;amp;= \left(
-\sum_{n = k}^\infty \sum_{{\psi_k}_0^{n}} \frac{(-\beta)^{n - q}}{(n - q)!}
+\sum_{n = k}^\infty \sum_{\{\psi_k\}_0^{n}} \frac{(-\beta)^{n - q}}{(n - q)!}
 \prod_{k} \left&amp;lt; \psi_k \right| H  \left| \psi_{k + 1} \right&amp;gt;
 \right) \Bigg/ \left(
-\sum_{n = 0}^\infty  \sum_{{\psi_k}_0^{n}}\frac{(-\beta)^n}{n!}
+\sum_{n = 0}^\infty  \sum_{\{\psi_k\}_0^{n}}\frac{(-\beta)^n}{n!}
 \prod_{k} \left&amp;lt; \psi_k \right| H  \left| \psi_{k + 1} \right&amp;gt;
 \right) \\&lt;br&gt;
 &amp;amp;= \left(
-\sum_{n = 0}^\infty \sum_{{\psi_k}_0^{n}}
+\sum_{n = 0}^\infty \sum_{\{\psi_k\}_0^{n}}
 \frac{(-\beta)^n}{n!} \frac{n (n - 1)\dots (n - q + 1)}{(-\beta)^q}
 \prod_{k} \left&amp;lt; \psi_k \right| H  \left| \psi_{k + 1} \right&amp;gt;
 \right) \Bigg/ \left(
-\sum_{n = 0}^\infty  \sum_{{\psi_k}_0^{n}}\frac{(-\beta)^n}{n!}
+\sum_{n = 0}^\infty  \sum_{\{\psi_k\}_0^{n}}\frac{(-\beta)^n}{n!}
 \prod_{k} \left&amp;lt; \psi_k \right| H  \left| \psi_{k + 1} \right&amp;gt;
 \right) \\&lt;br&gt;
 &amp;amp;= \left(
-\sum_{n = 0}^\infty \sum_{{\psi_k}_0^{n}}
+\sum_{n = 0}^\infty \sum_{\{\psi_k\}_0^{n}}
 \frac{n (n - 1)\dots (n - q + 1)}{(-\beta)^q}
 \underbrace{ \frac{(-\beta)^n}{n!}
-\prod_{k} \left&amp;lt; \psi_k \right| H  \left| \psi_{k + 1} \right&amp;gt; }_{W_n({ \psi_k})}
+\prod_{k} \left&amp;lt; \psi_k \right| H  \left| \psi_{k + 1} \right&amp;gt; }_{W_n(\{ \psi_k\})}
 \right) \Bigg/ \left(
-\sum_{n = 0}^\infty  \sum_{{\psi_k}_0^{n}}
+\sum_{n = 0}^\infty  \sum_{\{\psi_k\}_0^{n}}
 \underbrace{ \frac{(-\beta)^n}{n!}
-\prod_{k} \left&amp;lt; \psi_k \right| H  \left| \psi_{k + 1} \right&amp;gt; }_{W_n({ \psi_k})}
+\prod_{k} \left&amp;lt; \psi_k \right| H  \left| \psi_{k + 1} \right&amp;gt; }_{W_n(\{ \psi_k\})}
 \right) \\&lt;br&gt;
 &amp;amp;= \left(
-\sum_{n = 0}^\infty \sum_{{\psi_k}_0^{n}}
+\sum_{n = 0}^\infty \sum_{\{\psi_k\}_0^{n}}
 \frac{n (n - 1)\dots (n - q + 1)}{(-\beta)^q}
-W_n({ \psi_k})
+W_n(\{ \psi_k\})
 \right) \Bigg/ \left(
-\sum_{n = 0}^\infty  \sum_{{\psi_k}_0^{n}} W_n({ \psi_k})
+\sum_{n = 0}^\infty  \sum_{\{\psi_k\}_0^{n}} W_n(\{ \psi_k\})
 \right) \\&lt;br&gt;
 &amp;amp;= \frac{\left&amp;lt; n \ (n - 1) \dots (n - k + 1) \right&amp;gt;}{(-\beta)^k}
 \end{align}
@@ -293,7 +293,7 @@ $$&lt;/p&gt;
 &lt;td&gt;$1$&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
-&lt;td&gt;set of states ${\psi_k}$&lt;/td&gt;
+&lt;td&gt;set of states $\{\psi_k\}$&lt;/td&gt;
 &lt;td&gt;$n$&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
@@ -315,14 +315,14 @@ $$&lt;/p&gt;
 &lt;p&gt;We can also take a step further and require that every operator&amp;rsquo;s sequence have a fixed size $L$, that can be done inserting $L - n$ identity operators between the present operators. Doing so, the sum in $n$ is not required in our $Z$ expansion anymore. Note however, that an old configuration with $n$ operators may be mapped to a series of sequences which have the same operators in the same order but with $L - n$ identities distributed. In other words our configuration have being copied $L \choose n$ times according to the ways of distributing the sequence along the $L$ slots (you can also think the other way around and distribute the identities $L \choose L - n$).  To account for that, we divide the weight by the $L \choose n$ factor:
 $$
 \begin{align}
-Z &amp;amp;= \sum_{{\psi_k}_0^{L - 1}} \sum_{{t_m, b_m}^{L - 1}_0 }
+Z &amp;amp;= \sum_{\{\psi_k\}_0^{L - 1}} \sum_{\{t_m, b_m\}^{L - 1}_0 }
 \frac{(-\beta)^n}{n!} \frac{n! (L - n)!}{L!}
 \left&amp;lt; \psi_0 \right| H_{[t_0, b_0]} \left| \psi_1 \right&amp;gt;
 \left&amp;lt; \psi_1 \right| H_{[t_1, b_1]}  \left| \psi_2 \right&amp;gt;
 \dots
 \left&amp;lt; \psi_{L - 1} \right| H_{[t_{L - 1}, b_{L - 1}]}
 \left| \psi_0 \right&amp;gt; \\&lt;br&gt;
-&amp;amp;= \sum_{{\psi_k}_0^{L - 1}} \sum_{{t_m, b_m}^{L - 1}_0 }
+&amp;amp;= \sum_{\{\psi_k\}_0^{L - 1}} \sum_{\{t_m, b_m\}^{L - 1}_0 }
 \frac{(-\beta)^n (L - n)!}{L!}
 \left&amp;lt; \psi_0 \right| H_{[t_0, b_0]} \left| \psi_1 \right&amp;gt;
 \left&amp;lt; \psi_1 \right| H_{[t_1, b_1]}  \left| \psi_2 \right&amp;gt;
@@ -334,7 +334,7 @@ $$
 Where now a special value for $t_m$ can be attributed so that it represents the presence of a identity operator (for example $H_{[0, b]} = \mathbb{1}$) and $n$ represents the number of non identity operators in the string.&lt;/p&gt;
 &lt;p&gt;The final configuration weight can be finally written in terms of the operator sequence and the intermediary states:
 $$
-W({\psi_k}, {t_m, b_m}) = \frac{(-\beta)^n (L - n)!}{L!}
+W(\{\psi_k\}, \{t_m, b_m\}) = \frac{(-\beta)^n (L - n)!}{L!}
 \prod_{k = 0}^L
 \left&amp;lt; \psi_k \right| H_{[t_0, b_0]} \left| \psi_{k + 1} \right&amp;gt;
 $$

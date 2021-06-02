@@ -53,7 +53,7 @@ Z &= \sum_{\psi_0} \left< \psi_0 \right| \left[
 	\left< \psi_{n - 1} \right|  H
 	\left| \psi_0 \right> \\\\
 &= \sum_{n = 0}^\infty \frac{(-\beta)^n}{n!}
- 	\sum_{\{\psi_k\}_0^{n - 1}} \left< \psi_0 \right|
+ 	\sum_{\\{\psi_k\\}_0^{n - 1}} \left< \psi_0 \right|
 	H  \left| \psi_1 \right> \left< \psi_1 \right| 
 	H  \left| \psi_2 \right>
 	\dots
@@ -67,7 +67,7 @@ Note now that we have finally now written the operators in term of matrix elemen
 Finally we will move the states summation next to the expansion order, which gives us the following form:
 $$
 \begin{align}
-Z &= \sum_{n = 0}^\infty \sum_{\{\psi_k\}_0^{n - 1}}
+Z &= \sum_{n = 0}^\infty \sum_{\\{\psi_k\\}_0^{n - 1}}
 	\frac{(-\beta)^n}{n!} \left< \psi_0 \right|
 	H  \left| \psi_1 \right> \left< \psi_1 \right| 
 	H  \left| \psi_2 \right>
@@ -87,7 +87,7 @@ $$
 Each term $H_{[t,b]}$ could represent, for instance, an exchange term between two adjacent spins $H_{1, b} = S_{i(b)}S_{j(b)}$ where  both $i(b)$ and $j(b)$ maps the bond to the corresponding sites and the $t = 1$ would represent an exchange interaction type. Substituting the above expression into the last expression for $Z$ we have:
 $$
 \begin{align}
-Z &= \sum_{n = 0}^\infty \sum_{\{\psi_k\}_0^{n - 1}}
+Z &= \sum_{n = 0}^\infty \sum_{\\{\psi_k\\}_0^{n - 1}}
 	\frac{(-\beta)^n}{n!} \left< \psi_0 \right|
 	\left( \sum_{t_0, b_0} H_{[t_0, b_0]} \right)  \left| \psi_1 \right> \left< \psi_1 \right| 
 	\left( \sum_{t_1, b_1} H_{[t_1, b_1]} \right)  \left| \psi_2 \right>
@@ -99,7 +99,7 @@ $$
  Because each summation is independent, all the summations factor out and the sampled term is now a sequence of operators
 $$
 \begin{align}
-Z &= \sum_{n = 0}^\infty \sum_{\{\psi_k\}_0^{n - 1}} \sum_{\{t_m, b_m\}^{n - 1}_0 }
+Z &= \sum_{n = 0}^\infty \sum_{\\{\psi_k\\}_0^{n - 1}} \sum_{\\{t_m, b_m\\}^{n - 1}_0 }
 	\frac{(-\beta)^n}{n!} \left< \psi_0 \right|
 	H_{[t_0, b_0]} \left| \psi_1 \right> \left< \psi_1 \right| 
 	H_{[t_1, b_1]}  \left| \psi_2 \right>
@@ -108,17 +108,17 @@ Z &= \sum_{n = 0}^\infty \sum_{\{\psi_k\}_0^{n - 1}} \sum_{\{t_m, b_m\}^{n - 1}_
 	\left| \psi_0 \right> \\\\
 \end{align}
 $$
-Note that we now sample not only on the order $n$ and the states $\{\psi_k\}$ but also on the type, bond pair $[t_m, b_m]$. This allow us to distinguish between different kinds of interactions which will be very useful when constructing the update schemes on an actual simulation. 
+Note that we now sample not only on the order $n$ and the states $\\{\psi_k\\}$ but also on the type, bond pair $[t_m, b_m]$. This allow us to distinguish between different kinds of interactions which will be very useful when constructing the update schemes on an actual simulation. 
 
 ## Measuring physical observables
 
 If you've read the last section, than you realized that we can also sample under $H$ terms. For the sake of simplicity, will not include the extra summation on the internal energy and heat capacity estimators deviation. The resulting formulas still valid if the bond $H_{[t, b]}$ were sampled stochastically, and can easy be verified by a substitution of
 $$
-H = \sum_{\{t_m, b_m\}} H_{[t_m, b_m]}
+H = \sum_{\\{t_m, b_m\\}} H_{[t_m, b_m]}
 $$
 right before the identification of the ratio of summations with a thermal average $\left< \dots\right>$. Also, a new argument on the weights should be included as they now depend on the type and bond of the sampled operators:
 $$
-W_n(\{\psi_k\}) \rightarrow W_n(\{\psi_k\}, \{t_m, b_m\})
+W_n(\\{\psi_k\\}) \rightarrow W_n(\\{\psi_k\\}, \\{t_m, b_m\\})
 $$
 
 
@@ -143,7 +143,7 @@ $$
 	\left< \psi_{n - 1} \right| H \left| \psi_n \right>
 	\left< \psi_{n} \right| H \left| \psi_0 \right> \\\\
 &= \frac{1}{Z} \sum_{n = 0}^\infty \frac{(-\beta)^n}{n!}
- 	\sum_{\{\psi_k\}_0^{n}} \left< \psi_0 \right|
+ 	\sum_{\\{\psi_k\\}_0^{n}} \left< \psi_0 \right|
 	H  \left| \psi_1 \right> \left< \psi_1 \right| 
 	H  \left| \psi_2 \right>
 	\dots
@@ -155,7 +155,7 @@ But with an extra summation and an extra matrix element on the product. In total
 $$
 \begin{align}
 \left< E \right>= \frac{1}{Z} \sum_{m = 1}^\infty \frac{(-\beta)^{m - 1}}{(m - 1)!}
- 	\sum_{\{\psi_k\}_0^{m - 1}} \left< \psi_0 \right|
+ 	\sum_{\\{\psi_k\\}_0^{m - 1}} \left< \psi_0 \right|
 	H  \left| \psi_1 \right> \left< \psi_1 \right| 
 	H  \left| \psi_2 \right>
 	\dots
@@ -172,13 +172,13 @@ $$
 \begin{align}
 \left< E \right> &= \frac{1}{Z} \sum_{m = 0}^\infty \frac{(-\beta)^m}{m!}
 	\frac{m}{(-\beta)}
- 	\sum_{\{\psi_k\}_0^{m - 1}} \left< \psi_0 \right|
+ 	\sum_{\\{\psi_k\\}_0^{m - 1}} \left< \psi_0 \right|
 	H  \left| \psi_1 \right> \left< \psi_1 \right| 
 	H  \left| \psi_2 \right>
 	\dots
 	\left< \psi_{m - 1} \right| H 
 	\left| \psi_0 \right> \\\\
-&= \frac{1}{Z} \sum_{m = 0}^\infty \sum_{\{\psi_k\}_0^{m - 1}}
+&= \frac{1}{Z} \sum_{m = 0}^\infty \sum_{\\{\psi_k\\}_0^{m - 1}}
 	\frac{(-\beta)^m}{m!}
  	\left< \psi_0 \right|
 		H  \left| \psi_1 \right> \left< \psi_1 \right| 
@@ -186,7 +186,7 @@ $$
 		\dots
 		\left< \psi_{m - 1} \right| H 
 	\left| \psi_0 \right>  \frac{m}{(-\beta)} \\\\
-&= \frac{1}{Z} \sum_{n = 0}^\infty \sum_{\{\psi_k\}_0^{n - 1}}
+&= \frac{1}{Z} \sum_{n = 0}^\infty \sum_{\\{\psi_k\\}_0^{n - 1}}
 	\underbrace{
 	\frac{(-\beta)^n}{n!}
  	\left< \psi_0 \right|
@@ -194,11 +194,11 @@ $$
 		H  \left| \psi_2 \right>
 		\dots
 		\left< \psi_{n - 1} \right| H 
-	\left| \psi_0 \right>}_{W_n(\{\psi_k\})}  \frac{n}{(-\beta)} \\\\
+	\left| \psi_0 \right>}_{W_n(\\{\psi_k\\})}  \frac{n}{(-\beta)} \\\\
 &= - \frac{\left< n \right>}{\beta}
 \end{align}
 $$
-Where we renamed $m \rightarrow n$ from the second to the third line only for sake of notation (the symbol used has no importance, instead we should refer to this quantity always as the expansion order). Also note that the weight $W_n(\{\psi_k\})$ is the exactly the summation term of $Z$. This is in fact the probability weight we will use on our simulation, but for now let us delight ourselves with the fancy expression that we arrived
+Where we renamed $m \rightarrow n$ from the second to the third line only for sake of notation (the symbol used has no importance, instead we should refer to this quantity always as the expansion order). Also note that the weight $W_n(\\{\psi_k\\})$ is the exactly the summation term of $Z$. This is in fact the probability weight we will use on our simulation, but for now let us delight ourselves with the fancy expression that we arrived
 $$
 \left< E \right> = -\frac{\left< n \right>}{\beta}
 $$
@@ -227,40 +227,40 @@ You can follow the described sequence in the following steps (notice that we onl
 $$
 \begin{align}
 \frac{1}{Z}\partial^q_\beta Z &= \frac{1}{Z} \partial^q_\beta \left( 
-	\sum_{n = 0}^\infty \sum_{\{\psi_k\}_0^{n}} \frac{(-\beta)^n}{n!}
+	\sum_{n = 0}^\infty \sum_{\\{\psi_k\\}_0^{n}} \frac{(-\beta)^n}{n!}
  	 \prod_{k} \left< \psi_k \right| H  \left| \psi_{k + 1} \right>
 	\right) \\\\
 &= \left( 
-	\sum_{n = k}^\infty \sum_{\{\psi_k\}_0^{n}} \frac{(-\beta)^{n - q}}{(n - q)!}
+	\sum_{n = k}^\infty \sum_{\\{\psi_k\\}_0^{n}} \frac{(-\beta)^{n - q}}{(n - q)!}
  	\prod_{k} \left< \psi_k \right| H  \left| \psi_{k + 1} \right>
 	\right) \Bigg/ \left( 
-	\sum_{n = 0}^\infty  \sum_{\{\psi_k\}_0^{n}}\frac{(-\beta)^n}{n!}
+	\sum_{n = 0}^\infty  \sum_{\\{\psi_k\\}_0^{n}}\frac{(-\beta)^n}{n!}
  	\prod_{k} \left< \psi_k \right| H  \left| \psi_{k + 1} \right>
 	\right) \\\\
 &= \left( 
-	\sum_{n = 0}^\infty \sum_{\{\psi_k\}_0^{n}} 
+	\sum_{n = 0}^\infty \sum_{\\{\psi_k\\}_0^{n}} 
 	\frac{(-\beta)^n}{n!} \frac{n (n - 1)\dots (n - q + 1)}{(-\beta)^q}
  	\prod_{k} \left< \psi_k \right| H  \left| \psi_{k + 1} \right>
 	\right) \Bigg/ \left( 
-	\sum_{n = 0}^\infty  \sum_{\{\psi_k\}_0^{n}}\frac{(-\beta)^n}{n!}
+	\sum_{n = 0}^\infty  \sum_{\\{\psi_k\\}_0^{n}}\frac{(-\beta)^n}{n!}
  	\prod_{k} \left< \psi_k \right| H  \left| \psi_{k + 1} \right>
 	\right) \\\\
 &= \left( 
-	\sum_{n = 0}^\infty \sum_{\{\psi_k\}_0^{n}} 
+	\sum_{n = 0}^\infty \sum_{\\{\psi_k\\}_0^{n}} 
 	\frac{n (n - 1)\dots (n - q + 1)}{(-\beta)^q} 
 	\underbrace{ \frac{(-\beta)^n}{n!}
- 	\prod_{k} \left< \psi_k \right| H  \left| \psi_{k + 1} \right> }_{W_n(\{ \psi_k\})}
+ 	\prod_{k} \left< \psi_k \right| H  \left| \psi_{k + 1} \right> }_{W_n(\\{ \psi_k\\})}
 	\right) \Bigg/ \left( 
-	\sum_{n = 0}^\infty  \sum_{\{\psi_k\}_0^{n}}
+	\sum_{n = 0}^\infty  \sum_{\\{\psi_k\\}_0^{n}}
 	\underbrace{ \frac{(-\beta)^n}{n!}
- 	\prod_{k} \left< \psi_k \right| H  \left| \psi_{k + 1} \right> }_{W_n(\{ \psi_k\})}
+ 	\prod_{k} \left< \psi_k \right| H  \left| \psi_{k + 1} \right> }_{W_n(\\{ \psi_k\\})}
 	\right) \\\\
 &= \left( 
-	\sum_{n = 0}^\infty \sum_{\{\psi_k\}_0^{n}} 
+	\sum_{n = 0}^\infty \sum_{\\{\psi_k\\}_0^{n}} 
 	\frac{n (n - 1)\dots (n - q + 1)}{(-\beta)^q}
- 	W_n(\{ \psi_k\})
+ 	W_n(\\{ \psi_k\\})
 	\right) \Bigg/ \left( 
-	\sum_{n = 0}^\infty  \sum_{\{\psi_k\}_0^{n}} W_n(\{ \psi_k\})
+	\sum_{n = 0}^\infty  \sum_{\\{\psi_k\\}_0^{n}} W_n(\\{ \psi_k\\})
 	\right) \\\\
 &= \frac{\left< n \ (n - 1) \dots (n - k + 1) \right>}{(-\beta)^k}
 \end{align}
@@ -291,7 +291,7 @@ Every formula derived until here could be perfectly used to compute the macrosco
 | **Configuration/Sampled variable**                           | Data size |
 | ------------------------------------------------------------ | --------- |
 | $n$                                                          | $1$       |
-| set of states $\{\psi_k\}$                                   | $n$       |
+| set of states $\\{\psi_k\\}$                                   | $n$       |
 | string of operators $\prod_k \left< \psi_k \right\| H_k \left\| \psi_{k + 1}\right>$ | $n$       |
 | type of each operator $H_{[t_k, b_k]} \rightarrow t_k$       | $n$       |
 | bond of each operator $H_{[t_k, b_k]} \rightarrow b_k$       | $n$       |
@@ -303,14 +303,14 @@ Its expected that out Markov chain fluctuate around a mean $\left<n\right>$ so t
 We can also take a step further and require that every operator's sequence have a fixed size $L$, that can be done inserting $L - n$ identity operators between the present operators. Doing so, the sum in $n$ is not required in our $Z$ expansion anymore. Note however, that an old configuration with $n$ operators may be mapped to a series of sequences which have the same operators in the same order but with $L - n$ identities distributed. In other words our configuration have being copied $L \choose n$ times according to the ways of distributing the sequence along the $L$ slots (you can also think the other way around and distribute the identities $L \choose L - n$).  To account for that, we divide the weight by the $L \choose n$ factor:
 $$
 \begin{align}
-Z &= \sum_{\{\psi_k\}_0^{L - 1}} \sum_{\{t_m, b_m\}^{L - 1}_0 }
+Z &= \sum_{\\{\psi_k\\}_0^{L - 1}} \sum_{\\{t_m, b_m\\}^{L - 1}_0 }
 	\frac{(-\beta)^n}{n!} \frac{n! (L - n)!}{L!}
 	\left< \psi_0 \right| H_{[t_0, b_0]} \left| \psi_1 \right> 
 	\left< \psi_1 \right| H_{[t_1, b_1]}  \left| \psi_2 \right>
 	\dots
 	\left< \psi_{L - 1} \right| H_{[t_{L - 1}, b_{L - 1}]}
 	\left| \psi_0 \right> \\\\
- &= \sum_{\{\psi_k\}_0^{L - 1}} \sum_{\{t_m, b_m\}^{L - 1}_0 }
+ &= \sum_{\\{\psi_k\\}_0^{L - 1}} \sum_{\\{t_m, b_m\\}^{L - 1}_0 }
 	\frac{(-\beta)^n (L - n)!}{L!}
 	\left< \psi_0 \right| H_{[t_0, b_0]} \left| \psi_1 \right> 
 	\left< \psi_1 \right| H_{[t_1, b_1]}  \left| \psi_2 \right>
@@ -323,9 +323,9 @@ Where now a special value for $t_m$ can be attributed so that it represents the 
 
 The final configuration weight can be finally written in terms of the operator sequence and the intermediary states:
 $$
-W(\{\psi_k\}, \{t_m, b_m\}) = \frac{(-\beta)^n (L - n)!}{L!} 
+W(\\{\psi_k\\}, \\{t_m, b_m\\}) = \frac{(-\beta)^n (L - n)!}{L!} 
 	\prod_{k = 0}^L
-	\left< \psi_k \right| H_{[t_0, b_0]} \left| \psi_{k + 1} \right> 
+	\left< \psi_k \right| H_{[t_0, b_0]} \left| \psi_{k + 1} \right>
 $$
 Where we point-out that periodic boundary conditions on the "time" component should be satisfied due to the initial trace on the $Z$  definition. Hence we have that $\left| \psi_{L + 1} \right> = \left| \psi_{0} \right>$.
 
