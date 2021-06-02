@@ -278,7 +278,7 @@ Again, note that we made no assumptions about the nature of $H$ to arrive at thi
 $$
 c_v = Var[n] - E[n]
 $$&lt;/p&gt;
-&lt;h2 id=&#34;truncating-the-series-wip&#34;&gt;Truncating the series (WIP)&lt;/h2&gt;
+&lt;h2 id=&#34;truncating-the-series&#34;&gt;Truncating the series&lt;/h2&gt;
 &lt;p&gt;Every formula derived until here could be perfectly used to compute the macroscopic properties of quantum system by the means of a computer. However, one should point out the corresponding data structure used as the &amp;ldquo;current configuration&amp;rdquo; on the context of a metropolis simulation. The procedure followed on that algorithm consists on constantly updating an actual configuration according to random moves obeying some transitions probabilities. If that probabilities had correctly chosen, we are them guarantied that the sampled configuration follows the equilibrium distribution and statistical measurements can be made using the generated configuration. Because of the constantly updates on the current configuration, we may choose a data structure that can afford such often write operations. Lets check on a table what are the variables that describe a sampled configuration on the SSE framework:&lt;/p&gt;
 &lt;table&gt;
 &lt;thead&gt;
@@ -297,8 +297,8 @@ $$&lt;/p&gt;
 &lt;td&gt;$n$&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
-&lt;td&gt;string of operators $\prod_k \left&amp;lt; \psi_k\right&lt;/td&gt;
-&lt;td&gt;H_k \left&lt;/td&gt;
+&lt;td&gt;string of operators $\prod_k \left&amp;lt; \psi_k \right| H_k \left| \psi_{k + 1}\right&amp;gt;$&lt;/td&gt;
+&lt;td&gt;$n$&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td&gt;type of each operator $H_{[t_k, b_k]} \rightarrow t_k$&lt;/td&gt;
@@ -311,7 +311,34 @@ $$&lt;/p&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
 &lt;p&gt;Note that there are 3 quantities whose size may vary with the expansion order $n$. Thats because the operators string is constantly growing/shrinking as we update $n$. Obviously we could use a list as a data structure when implementing that because of the mutable size. But mutable size is not a preferably approach when considering performance costs (not only they have linear access time but the data is not stored contiguously in memory). When designing high performance simulations we should try to keep data as compactly as possible and minimize the access time across by storing it contiguously. Also, not having to rely on constant copies operations or rewrites is something to keep in mind.&lt;/p&gt;
-&lt;p&gt;Notice that we do not expect our simulation to walk much farther than the mean $\left&amp;lt;n\right&amp;gt;$ so that truncating the series expansions on a maximum $L &amp;gt; n_{max}$ would enable us to use a vector data structure for the above three sampled quantities. The maximum size $L$ should be calculated by fixing the simulation parameters (such as $\beta$), evaluating the mean $\left&amp;lt; n \right&amp;gt;$ and resizing to the new size $L \rightarrow \alpha \left&amp;lt; n\right&amp;gt;$ where something like $\alpha = 1.3$ should do it.&lt;/p&gt;
+&lt;p&gt;Its expected that out Markov chain fluctuate around a mean $\left&amp;lt;n\right&amp;gt;$ so that truncating the series expansions on a maximum $L &amp;gt; n_{max}$ would enable us to use a vector data structure for the above three sampled quantities. The maximum size $L$ should be calculated by fixing the simulation parameters (such as $\beta$), evaluating the mean $\left&amp;lt; n \right&amp;gt;$ and resizing to the new size $L \rightarrow \alpha \left&amp;lt; n\right&amp;gt;$ where something like $\alpha = 1.3$ should do it. The above truncation does not introduce any systematic errors to our simulation, in fact, configurations for $n &amp;gt; L are rarely reachable.&lt;/p&gt;
+&lt;p&gt;We can also take a step further and require that every operator&amp;rsquo;s sequence have a fixed size $L$, that can be done inserting $L - n$ identity operators between the present operators. Doing so, the sum in $n$ is not required in our $Z$ expansion anymore. Note however, that an old configuration with $n$ operators may be mapped to a series of sequences which have the same operators in the same order but with $L - n$ identities distributed. In other words our configuration have being copied $L \choose n$ times according to the ways of distributing the sequence along the $L$ slots (you can also think the other way around and distribute the identities $L \choose L - n$).  To account for that, we divide the weight by the $L \choose n$ factor:
+$$
+\begin{align}
+Z &amp;amp;= \sum_{{\psi_k}_0^{L - 1}} \sum_{{t_m, b_m}^{L - 1}_0 }
+\frac{(-\beta)^n}{n!} \frac{n! (L - n)!}{L!}
+\left&amp;lt; \psi_0 \right| H_{[t_0, b_0]} \left| \psi_1 \right&amp;gt;
+\left&amp;lt; \psi_1 \right| H_{[t_1, b_1]}  \left| \psi_2 \right&amp;gt;
+\dots
+\left&amp;lt; \psi_{L - 1} \right| H_{[t_{L - 1}, b_{L - 1}]}
+\left| \psi_0 \right&amp;gt; \\&lt;br&gt;
+&amp;amp;= \sum_{{\psi_k}_0^{L - 1}} \sum_{{t_m, b_m}^{L - 1}_0 }
+\frac{(-\beta)^n (L - n)!}{L!}
+\left&amp;lt; \psi_0 \right| H_{[t_0, b_0]} \left| \psi_1 \right&amp;gt;
+\left&amp;lt; \psi_1 \right| H_{[t_1, b_1]}  \left| \psi_2 \right&amp;gt;
+\dots
+\left&amp;lt; \psi_{L - 1} \right| H_{[t_{L - 1}, b_{L - 1}]}
+\left| \psi_0 \right&amp;gt; \\&lt;br&gt;
+\end{align}
+$$
+Where now a special value for $t_m$ can be attributed so that it represents the presence of a identity operator (for example $H_{[0, b]} = \mathbb{1}$) and $n$ represents the number of non identity operators in the string.&lt;/p&gt;
+&lt;p&gt;The final configuration weight can be finally written in terms of the operator sequence and the intermediary states:
+$$
+W({\psi_k}, {t_m, b_m}) = \frac{(-\beta)^n (L - n)!}{L!}
+\prod_{k = 0}^L
+\left&amp;lt; \psi_k \right| H_{[t_0, b_0]} \left| \psi_{k + 1} \right&amp;gt;
+$$
+Where we point-out that periodic boundary conditions on the &amp;ldquo;time&amp;rdquo; component should be satisfied due to the initial trace on the $Z$  definition. Hence we have that $\left| \psi_{L + 1} \right&amp;gt; = \left| \psi_{0} \right&amp;gt;$.&lt;/p&gt;
 &lt;section class=&#34;footnotes&#34; role=&#34;doc-endnotes&#34;&gt;
 &lt;hr&gt;
 &lt;ol&gt;

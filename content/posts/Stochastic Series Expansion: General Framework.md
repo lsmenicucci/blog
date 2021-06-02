@@ -284,7 +284,7 @@ $$
 c_v = Var[n] - E[n]
 $$
 
-## Truncating the series (WIP)
+## Truncating the series
 
 Every formula derived until here could be perfectly used to compute the macroscopic properties of quantum system by the means of a computer. However, one should point out the corresponding data structure used as the "current configuration" on the context of a metropolis simulation. The procedure followed on that algorithm consists on constantly updating an actual configuration according to random moves obeying some transitions probabilities. If that probabilities had correctly chosen, we are them guarantied that the sampled configuration follows the equilibrium distribution and statistical measurements can be made using the generated configuration. Because of the constantly updates on the current configuration, we may choose a data structure that can afford such often write operations. Lets check on a table what are the variables that describe a sampled configuration on the SSE framework:
 
@@ -292,13 +292,42 @@ Every formula derived until here could be perfectly used to compute the macrosco
 | ------------------------------------------------------------ | --------- |
 | $n$                                                          | $1$       |
 | set of states $\{\psi_k\}$                                   | $n$       |
-| string of operators $\prod_k \left< \psi_k\right| H_k \left| \psi_{k + 1}\right>$ | $n$       |
+| string of operators $\prod_k \left< \psi_k \right\| H_k \left\| \psi_{k + 1}\right>$ | $n$       |
 | type of each operator $H_{[t_k, b_k]} \rightarrow t_k$       | $n$       |
 | bond of each operator $H_{[t_k, b_k]} \rightarrow b_k$       | $n$       |
 
 Note that there are 3 quantities whose size may vary with the expansion order $n$. Thats because the operators string is constantly growing/shrinking as we update $n$. Obviously we could use a list as a data structure when implementing that because of the mutable size. But mutable size is not a preferably approach when considering performance costs (not only they have linear access time but the data is not stored contiguously in memory). When designing high performance simulations we should try to keep data as compactly as possible and minimize the access time across by storing it contiguously. Also, not having to rely on constant copies operations or rewrites is something to keep in mind.
 
-Notice that we do not expect our simulation to walk much farther than the mean $\left<n\right>$ so that truncating the series expansions on a maximum $L > n_{max}$ would enable us to use a vector data structure for the above three sampled quantities. The maximum size $L$ should be calculated by fixing the simulation parameters (such as $\beta$), evaluating the mean $\left< n \right>$ and resizing to the new size $L \rightarrow \alpha \left< n\right>$ where something like $\alpha = 1.3$ should do it. 
+Its expected that out Markov chain fluctuate around a mean $\left<n\right>$ so that truncating the series expansions on a maximum $L > n_{max}$ would enable us to use a vector data structure for the above three sampled quantities. The maximum size $L$ should be calculated by fixing the simulation parameters (such as $\beta$), evaluating the mean $\left< n \right>$ and resizing to the new size $L \rightarrow \alpha \left< n\right>$ where something like $\alpha = 1.3$ should do it. The above truncation does not introduce any systematic errors to our simulation, in fact, configurations for $n > L are rarely reachable.
+
+We can also take a step further and require that every operator's sequence have a fixed size $L$, that can be done inserting $L - n$ identity operators between the present operators. Doing so, the sum in $n$ is not required in our $Z$ expansion anymore. Note however, that an old configuration with $n$ operators may be mapped to a series of sequences which have the same operators in the same order but with $L - n$ identities distributed. In other words our configuration have being copied $L \choose n$ times according to the ways of distributing the sequence along the $L$ slots (you can also think the other way around and distribute the identities $L \choose L - n$).  To account for that, we divide the weight by the $L \choose n$ factor:
+$$
+\begin{align}
+Z &= \sum_{\{\psi_k\}_0^{L - 1}} \sum_{\{t_m, b_m\}^{L - 1}_0 }
+	\frac{(-\beta)^n}{n!} \frac{n! (L - n)!}{L!}
+	\left< \psi_0 \right| H_{[t_0, b_0]} \left| \psi_1 \right> 
+	\left< \psi_1 \right| H_{[t_1, b_1]}  \left| \psi_2 \right>
+	\dots
+	\left< \psi_{L - 1} \right| H_{[t_{L - 1}, b_{L - 1}]}
+	\left| \psi_0 \right> \\\\
+ &= \sum_{\{\psi_k\}_0^{L - 1}} \sum_{\{t_m, b_m\}^{L - 1}_0 }
+	\frac{(-\beta)^n (L - n)!}{L!}
+	\left< \psi_0 \right| H_{[t_0, b_0]} \left| \psi_1 \right> 
+	\left< \psi_1 \right| H_{[t_1, b_1]}  \left| \psi_2 \right>
+	\dots
+	\left< \psi_{L - 1} \right| H_{[t_{L - 1}, b_{L - 1}]}
+	\left| \psi_0 \right> \\\\
+\end{align}
+$$
+Where now a special value for $t_m$ can be attributed so that it represents the presence of a identity operator (for example $H_{[0, b]} = \mathbb{1}$) and $n$ represents the number of non identity operators in the string. 
+
+The final configuration weight can be finally written in terms of the operator sequence and the intermediary states:
+$$
+W(\{\psi_k\}, \{t_m, b_m\}) = \frac{(-\beta)^n (L - n)!}{L!} 
+	\prod_{k = 0}^L
+	\left< \psi_k \right| H_{[t_0, b_0]} \left| \psi_{k + 1} \right> 
+$$
+Where we point-out that periodic boundary conditions on the "time" component should be satisfied due to the initial trace on the $Z$  definition. Hence we have that $\left| \psi_{L + 1} \right> = \left| \psi_{0} \right>$.
 
 [^1]: [Stochastic series expansion method with operator-loop update](https://journals.aps.org/prb/abstract/10.1103/PhysRevB.59.R14157)
 [^2]: [Computational Studies of Quantum Spin Systems](https://aip.scitation.org/doi/abs/10.1063/1.3518900)
