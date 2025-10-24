@@ -1,5 +1,6 @@
 {
     "content_dir": "content",
     "template_dir": "template",
-    "static_dir": "static"
+    "static_dir": "static",
+    "export_dir": "docs"
 }

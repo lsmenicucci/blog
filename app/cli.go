@@ -9,8 +9,13 @@ import (
 
 func main() {
 	serveCmd := flag.Bool("serve", false, "start the dev server")
-	exportCmd := flag.String("export", "", "export all posts to folder")
+	exportCmd := flag.Bool("export", false, "export all posts to folder")
 	flag.Parse()
+
+	if *exportCmd && *serveCmd {
+		flag.Usage()
+		os.Exit(0)
+	}
 
 	// loag config
 	err := LoadConfig("config.json")
@@ -24,8 +29,8 @@ func main() {
 		return
 	}
 
-	if *exportCmd != "" {
-		err := Export(*exportCmd)
+	if *exportCmd {
+		err := Export(config.ExportDir)
 		if err != nil {
 			log.Println("Export error:", err)
 			os.Exit(1)
