@@ -1,20 +1,47 @@
 @import url('https://fonts.googleapis.com/css2?family=Funnel+Sans:ital,wght@0,300..800;1,300..800&display=swap');
 
+@import url('https://fonts.googleapis.com/css2?family=Fragment+Mono:ital@0;1&family=Funnel+Sans:ital,wght@0,300..800;1,300..800&display=swap');
+
 :root {
     /* https://coolors.co/561d25-f0f0f0-d6d6d6-1f1f1f */
     --white: #f0f0f0;
     --black: #1F1F1F;
     --gray: #D6D6D6;
-    --red: #561D25;
+    --red: #291711;
+    --bright-red: #E94957;
 }
 
 body {
-    margin: 2em 20vw;
+    margin: 2em 18%;
     background-color: var(--white);
     color: var(--black);
     font-family: "Funnel Sans", sans-serif;
     font-optical-sizing: auto;
     font-style: normal;
+    font-size: 1.225rem;
+    line-height: 1.5;
+    box-sizing: border-box;
+}
+
+.post-date:after {
+    content: '•';
+    padding-left: 0.5em;
+}
+
+@media (max-width: 768px) {
+    body {
+        margin: 1.5em 5%;
+        font-size: 1.05rem;
+        line-height: 1.55;
+    }
+}
+
+@media (max-width: 480px) {
+    body {
+        margin: 1em 4%;
+        font-size: 1rem;
+        line-height: 1.5;
+    }
 }
 
 .post-list {
@@ -39,7 +66,7 @@ body {
         background-color: var(--gray);
     }
 
-    .post-tag-list{
+    .post-tag-list {
         max-width: 25%;
     }
 }
@@ -59,8 +86,8 @@ body {
 
 .post-tag {
     border-radius: 2.5px;
-    font-size: 0.9em;
-    padding: 0.2em 0.35em;
+    font-size: 0.85em;
+    padding: 0.075em 0.35em;
     background-color: var(--red);
     color: whitesmoke;
 
@@ -95,20 +122,32 @@ body {
 
 /* post image modal */
 #imgModal {
-  display: none;
-  position: fixed;
-  z-index: 9999;
-  top: 0; left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0,0,0,0.8);
-  justify-content: center;
-  align-items: center;
+    display: none;
+    position: fixed;
+    z-index: 9999;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    justify-content: center;
+    align-items: center;
 }
+
 #imgModal img {
-  max-width: 90%;
-  max-height: 90%;
+    max-width: 95%;
+    max-height: 95%;
 }
+
 #imgModal.show {
-  display: flex;
+    display: flex;
+}
+
+.site-footer {
+    text-align: center;
+    font-size: 0.85rem;
+    color: var(--black);
+    padding: 1em 0;
+    border-top: 1px solid var(--black);
+    margin-top: 3em;
 }

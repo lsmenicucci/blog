@@ -1,0 +1,54 @@
+pre code {
+    font-family: "Fragment Mono", monospace;
+    font-weight: 400;
+    font-style: normal;
+    border-radius: 5px;
+    font-size: 1rem;
+}
+
+@media (max-width: 768px) {
+    pre code {
+        font-size: 1.05rem;
+    }
+}
+
+@media (max-width: 480px) {
+    pre code {
+        font-size: 0.9rem;
+    }
+}
+
+.hljs {
+    background: var(--black);
+    color: var(--white);
+}
+
+
+.hljs-title,
+.hljs-params,
+.hljs-number {
+    color: var(--white);
+}
+
+.hljs-comment,
+.hljs-string
+{
+color: var(--gray);
+}
+
+.hljs-keyword,
+.hljs-literal,
+.hljs-function,
+.hljs-type,
+.hljs-class,
+.hljs-doctag,
+.hljs-meta,
+.hljs-tag,
+.hljs-attr,
+.hljs-symbol,
+.hljs-builtin,
+.hljs-variable,
+.hljs-built_in,
+.hljs-link {
+    color: var(--bright-red);
+}
