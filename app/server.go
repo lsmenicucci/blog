@@ -7,14 +7,26 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
 var logger = log.New(os.Stdout, "[ server ] ", 0)
 
-func renderTemplate(w io.Writer, tmpl string, data map[string]any, devMode bool) {
-	t := template.Must(template.ParseFiles(config.TemplatePath("base"), tmpl))
-	data["Dev"] = devMode
+var devMode = false
+
+func renderTemplate(w io.Writer, tmpl string, data map[string]any) {
+	funcMap := template.FuncMap{
+		"joinPath": filepath.Join,
+	}
+	t := template.New("base").Funcs(funcMap)
+	t = template.Must(t.ParseFiles(config.TemplatePath("base"), tmpl))
+
+	if devMode {
+		data["BasePath"] = ""
+	} else {
+		data["BasePath"] = config.BasePath
+	}
 	t.ExecuteTemplate(w, "base.html", data)
 }
 
@@ -30,7 +42,7 @@ func renderPostList(w io.Writer) error {
 	}
 
 	data := map[string]any{"Posts": posts}
-	renderTemplate(w, config.TemplatePath("list"), data, true)
+	renderTemplate(w, config.TemplatePath("list"), data)
 	return nil
 }
 
@@ -54,7 +66,7 @@ func renderPost(name string, w http.ResponseWriter) error {
 	data := map[string]any{
 		"Post": post,
 	}
-	renderTemplate(w, config.TemplatePath("post"), data, true)
+	renderTemplate(w, config.TemplatePath("post"), data)
 
 	return nil
 }
@@ -74,6 +86,8 @@ func postHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func serve() {
+	devMode = true
+
 	w := NewWatcher([]string{config.ContentDir, config.StaticDir, config.TemplateDir})
 	http.Handle("/ws", w.HandleWS())
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir(config.StaticDir))))

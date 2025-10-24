@@ -2,5 +2,6 @@
     "content_dir": "content",
     "template_dir": "template",
     "static_dir": "static",
-    "export_dir": "docs"
+    "export_dir": "docs",
+    "base_path": "/blog"
 }

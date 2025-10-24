@@ -11,6 +11,7 @@ type Config struct {
 	TemplateDir string `json:"template_dir"`
 	StaticDir   string `json:"static_dir"`
 	ExportDir   string `json:"export_dir"`
+	BasePath    string `json:"base_path"`
 }
 
 func (c Config) TemplatePath(name string) string {

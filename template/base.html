@@ -2,11 +2,7 @@
 <html>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-{{ if .Dev }}
-<link rel="stylesheet" href="/static/style.css">
-{{ else }}
-<link rel="stylesheet" href="/blog/static/style.css">
-{{ end }}
+<link rel="stylesheet" href="{{ joinPath .BasePath "/static/style.css" }}">
 
 {{ if .Dev }}
 <script src="/static/hot-reload.js"></script>
@@ -37,13 +33,8 @@
 
 <script>hljs.highlightAll();</script>
 
-{{ if .Dev }}
-<script src="/static/image-modal.js" defer></script>
-<link rel="stylesheet" href="/static/highlight.css">
-{{ else }}
-<script src="/blog/static/image-modal.js" defer></script>
-<link rel="stylesheet" href="/blog/static/highlight.css">
-{{ end }}
+<script src="{{ joinPath .BasePath "/static/image-modal.js"}}" defer></script>
+<link rel="stylesheet" href="{{ joinPath .BasePath "/static/highlight.css" }}">
 
 
 <body>

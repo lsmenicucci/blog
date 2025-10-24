@@ -1,7 +1,7 @@
 {{ define "content" }}
 <div class="post-list">
     {{ range $postIdx, $post := .Posts }}
-    <a class="post-list-item" href="{{ $post.Url }}">
+    <a class="post-list-item" href="{{ joinPath $.BasePath $post.Url }}">
         <span class="post-date">{{ $post.PublicationDate }}</span>
         <span class="post-title">{{ $post.Title }}</span>
         <span class="post-tag-list">
