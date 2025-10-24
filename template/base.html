@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
 <link rel="stylesheet" href="/static/style.css">
 {{ if .Dev }}
 <script src="/static/hot-reload.js"></script>
 {{ end }}
 
+<!-- Katex -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js"></script>
@@ -20,10 +22,25 @@
     });
 </script>
 
+<!-- Highlight.js -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/default.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/go.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/fortran.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/python.min.js"></script>
+
+<script>hljs.highlightAll();</script>
+
 <script src="/static/image-modal.js" defer></script>
+<link rel="stylesheet" href="/static/highlight.css">
 
 <body>
     {{ template "content" . }}
+
+    <footer class="site-footer">
+        por Lucas de S. M.
+    </footer>
 </body>
 
 </html>
