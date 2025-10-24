@@ -46,7 +46,7 @@ func Export(dist string) error {
 		if err != nil {
 			return err
 		}
-		renderTemplate(f, config.TemplatePath("post"), map[string]any{"Post": post, "dev": false})
+		renderTemplate(f, config.TemplatePath("post"), map[string]any{"Post": post}, false)
 		f.Close()
 	}
 	listFile := filepath.Join(dist, "index.html")
@@ -54,7 +54,7 @@ func Export(dist string) error {
 	if err != nil {
 		return err
 	}
-	renderTemplate(f, config.TemplatePath("list"), map[string]any{"Posts": posts, "dev": false})
+	renderTemplate(f, config.TemplatePath("list"), map[string]any{"Posts": posts}, false)
 	f.Close()
 	copyDir("static", filepath.Join(dist, "static"))
 	return nil

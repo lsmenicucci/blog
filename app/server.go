@@ -12,9 +12,9 @@ import (
 
 var logger = log.New(os.Stdout, "[ server ] ", 0)
 
-func renderTemplate(w io.Writer, tmpl string, data map[string]any) {
+func renderTemplate(w io.Writer, tmpl string, data map[string]any, devMode bool) {
 	t := template.Must(template.ParseFiles(config.TemplatePath("base"), tmpl))
-	data["dev"] = true
+	data["Dev"] = devMode
 	t.ExecuteTemplate(w, "base.html", data)
 }
 
@@ -30,7 +30,7 @@ func renderPostList(w io.Writer) error {
 	}
 
 	data := map[string]any{"Posts": posts}
-	renderTemplate(w, config.TemplatePath("list"), data)
+	renderTemplate(w, config.TemplatePath("list"), data, true)
 	return nil
 }
 
@@ -54,7 +54,7 @@ func renderPost(name string, w http.ResponseWriter) error {
 	data := map[string]any{
 		"Post": post,
 	}
-	renderTemplate(w, config.TemplatePath("post"), data)
+	renderTemplate(w, config.TemplatePath("post"), data, true)
 
 	return nil
 }
