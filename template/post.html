@@ -1,0 +1,21 @@
+{{ define "content" }}
+<div class="post">
+    <h1 class="title">{{ .Post.Title }}</h1>
+    <hr />
+    <div class="meta">
+        <span class="date">{{ .Post.PublicationDate }}</span>
+        <span class="post-tag-list">
+            {{ range $tagIdx, $tag := .Post.Tags }}
+            <span class="post-tag">
+                {{ $tag }}
+            </span>
+            {{ end }}
+        </span>
+    </div>
+
+    <div class="content">
+        {{ .Post.Content }}
+    </div>
+</div>
+<div id="imgModal"><img src="" alt=""></div>
+{{ end }}

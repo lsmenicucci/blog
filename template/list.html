@@ -1,0 +1,17 @@
+{{ define "content" }}
+<div class="post-list">
+    {{ range $postIdx, $post := .Posts }}
+    <a class="post-list-item" href="{{ $post.Url }}">
+        <span class="post-date">{{ $post.PublicationDate }}</span>
+        <span class="post-title">{{ $post.Title }}</span>
+        <span class="post-tag-list">
+            {{ range $tagIdx, $tag := $post.Tags }}
+            <span class="post-tag">
+                {{ $tag }}
+            </span>
+            {{ end }}
+        </span>
+    </a>
+    {{ end }}
+</div>
+{{ end }}

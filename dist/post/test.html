@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+
+<link rel="stylesheet" href="/static/style.css">
+
+<script src="/static/hot-reload.js"></script>
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        renderMathInElement(document.body, {
+            delimiters: [
+                {left: "$$", right: "$$", display: true},
+                {left: "$", right: "$", display: false}
+            ]
+        });
+    });
+</script>
+
+<script src="/static/image-modal.js" defer></script>
+
+<body>
+    
+<div class="post">
+    <h1 class="title">My First Post</h1>
+    <hr />
+    <div class="meta">
+        <span class="date">23 Oct 2025</span>
+        <span class="post-tag-list">
+            
+            <span class="post-tag">
+                golang
+            </span>
+            
+            <span class="post-tag">
+                web
+            </span>
+            
+            <span class="post-tag">
+                stuff
+            </span>
+            
+            <span class="post-tag">
+                test
+            </span>
+            
+            <span class="post-tag">
+                aaa
+            </span>
+            
+            <span class="post-tag">
+                another
+            </span>
+            
+        </span>
+    </div>
+
+    <div class="content">
+        <p>Hey this is post!!!</p>
+<p>Teste <em>italic</em></p>
+
+    </div>
+</div>
+<div id="imgModal"><img src="" alt=""></div>
+
+</body>
+
+</html>

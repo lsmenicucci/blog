@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+
+<link rel="stylesheet" href="/static/style.css">
+{{ if .dev }}
+<script src="/static/hot-reload.js"></script>
+{{ end }}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        renderMathInElement(document.body, {
+            delimiters: [
+                {left: "$$", right: "$$", display: true},
+                {left: "$", right: "$", display: false}
+            ]
+        });
+    });
+</script>
+
+<script src="/static/image-modal.js" defer></script>
+
+<body>
+    {{ template "content" . }}
+</body>
+
+</html>

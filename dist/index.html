@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+
+<link rel="stylesheet" href="/static/style.css">
+
+<script src="/static/hot-reload.js"></script>
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        renderMathInElement(document.body, {
+            delimiters: [
+                {left: "$$", right: "$$", display: true},
+                {left: "$", right: "$", display: false}
+            ]
+        });
+    });
+</script>
+
+<script src="/static/image-modal.js" defer></script>
+
+<body>
+    
+<div class="post-list">
+    
+    <a class="post-list-item" href="/post/another-post.html">
+        <span class="post-date">24 Oct 2025</span>
+        <span class="post-title">Simulating Accretion Disks with CFD</span>
+        <span class="post-tag-list">
+            
+            <span class="post-tag">
+                math
+            </span>
+            
+            <span class="post-tag">
+                physics
+            </span>
+            
+        </span>
+    </a>
+    
+    <a class="post-list-item" href="/post/test.html">
+        <span class="post-date">23 Oct 2025</span>
+        <span class="post-title">My First Post</span>
+        <span class="post-tag-list">
+            
+            <span class="post-tag">
+                golang
+            </span>
+            
+            <span class="post-tag">
+                web
+            </span>
+            
+            <span class="post-tag">
+                stuff
+            </span>
+            
+            <span class="post-tag">
+                test
+            </span>
+            
+            <span class="post-tag">
+                aaa
+            </span>
+            
+            <span class="post-tag">
+                another
+            </span>
+            
+        </span>
+    </a>
+    
+</div>
+
+</body>
+
+</html>
