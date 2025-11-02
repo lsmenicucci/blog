@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<link rel="stylesheet" href="/blog/static/style.css">
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        renderMathInElement(document.body, {
+            delimiters: [
+                {left: "$$", right: "$$", display: true},
+                {left: "$", right: "$", display: false}
+            ]
+        });
+    });
+</script>
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/default.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/go.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/fortran.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/python.min.js"></script>
+
+<script>hljs.highlightAll();</script>
+
+<script src="/blog/static/image-modal.js" defer></script>
+<link rel="stylesheet" href="/blog/static/highlight.css">
+
+
+<body>
+    
+<div class="post">
+    <h1 class="title">Resolvendo a equacão da pressão (1)</h1>
+    <hr />
+    <div class="meta">
+        <span class="date">01 Nov 2025</span>
+        <span class="post-tag-list">
+            
+            <span class="post-tag">
+                fortran
+            </span>
+            
+            <span class="post-tag">
+                fvm-code
+            </span>
+            
+        </span>
+    </div>
+
+    <div class="content">
+        <p>Depois de alguma experimentacão sobre resolver equacoes elípticas, resolvi adotar a bilioteca Petsc para tratar da equacão para a pressão no código de fluido-dinâmica em volumes finitos que estou escrevendo. Previamente, segui a literatura por trás do código EULAG e implementei um precondicionador baseado no método ADI, que decompoe o operador da equacão em diferentes direcões e resolve os problemas unidimensionais alternadamente. Segundo a literatura de volumes finitos, esta técnica não generaliza bem quando consideradas grades genéricas. Como decompor um grade em &quot;fibras&quot; que não se interceptam? Como paralelizar isto para vários hardwares? Não vale a pena me debrucar nestes problemas quando o objetivo principal é utilizar esse cógido para estudar sistemas físicos (e encher a minha tese de douturado de artigos!). Me baseando na quantidade de atualizações ativas do repositório (e no design do site) escolhi a Petsc para resolver a equação da pressão.</p>
+<h2>Instalando e linkando</h2>
+<p>Tudo aqui é só uma sequência mais didática das <a href="https://petsc.org/release/install/">instrucões providas no site da biblioteca</a>.</p>
+<p>Para utilizar a biblioteca em um código Fortran, precisamos informar o compilador onde achar as funcões referenciadas no código e os arquivos com cabeçalhos de definicões que serão inclusos no programa. Respectivamente, precisamos passar as flags <code>-L&lt;diretorio-1&gt; -I&lt;diretorio-2&gt; -lpetsc</code>, onde a ultima indica ao compilador que queremos linkar um arquivo <code>libpetsc.so</code> no executável. Seja lá onde o petsc foi instalado, no seu diretório base devemos encontrar algo como:</p>
+<pre><code class="language-shell">$ ls .
+include  lib  nix-support  share
+</code></pre>
+<p>O <code>nix-support</code> veio pois instalei o pacote por meio de um <code>shell.nix</code>. O <code>include</code> tem uma estrutura do tipo:</p>
+<pre><code class="language-shell">$ tree include
+include
+├── petsc
+│   ├── finclude
+│   │   ├── petscao.h
+│   │   ├── petscbag.h
+...
+├── petscaodef.mod
+├── petscao.h
+├── petscao.mod
+...
+</code></pre>
+<p>Perceba que no primeiro nível, temos cabeçalhos de C <code>*.h</code> e módulos de fortran <code>*.mod</code> ja precompilados. Um outro diretório <code>finclude</code> é contém os cabeçalhos que realmente vamos utilizar no nosso programa em Fortran.</p>
+<p>No diretório <code>lib</code> encontramos onde o compilador deve achar a biblioteca dinâmica:</p>
+<pre><code class="language-shell">$ tree lib
+lib
+├── libpetsc.so -&gt; libpetsc.so.3.23.2
+├── libpetsc.so.3.23 -&gt; libpetsc.so.3.23.2
+├── libpetsc.so.3.23.2
+...
+</code></pre>
+<p>O argumento <code>-l&lt;nome&gt;</code> induz o <em>linker</em> a procurar um arquivo <code>lib&lt;nome&gt;.so</code> em algum dos diretórios passados através do <code>-L</code>.</p>
+<p>Como era de se esperar de uma biblioteca realmente feita para ser utilizada (cujo oposto é surpreendentemente comum no meio científico), seu pacote gera um arquivo <code>pkgconfig</code> o que nos permite gerar as flags a serem passadas para o compilador facilmente:</p>
+<pre><code class="language-shell">$ pkg-config --cflags --libs petsc
+-I/nix/store/sqi0ya669hw8317fbn0dr7pmk5hdja39-petsc-3.23.2/include -L/nix/store/sqi0ya669hw8317fbn0dr7pmk5hdja39-petsc-3.23.2/lib -lpetsc
+</code></pre>
+<p>Esta resolucão programática pode ser utilizada para carregar as flags automaticamente, como é feito no meu <code>shell.nix</code>:</p>
+<pre><code>{
+  pkgs ? import &lt;nixpkgs&gt; { },
+  lib ? pkgs.lib,
+}:
+
+pkgs.mkShell {
+  packages = with pkgs; [
+    pkg-config
+    hdf5-fortran-mpi
+    openmpi
+    petsc
+  ];
+
+  shellHook = ''
+  export FPM_FFLAGS=&quot;$FPM_FFLAGS $(pkg-config --cflags --libs hdf5_fortran)&quot;
+  export FPM_FFLAGS=&quot;$FPM_FFLAGS $(pkg-config --cflags --libs petsc)&quot;
+'';
+}
+</code></pre>
+<p>A variável <code>FPM_FFLAGS</code> é simplesmente substituída durente a compilacão, algo do tipo <code>gfortran $FPM_FFLAGS in.f90 -o out</code>. Também inclui a blioteca para HDF5, o que não é necessário para o caso atual.</p>
+<p>Seguindo o tutorial do site da biblioteca, podemos construir um exemplo mínimo para testar se tudo esta no lugar certo:</p>
+<pre><code class="language-f90">program minimal
+
+#include &lt;petsc/finclude/petscksp.h&gt;
+    use petscksp
+    implicit none
+  
+    integer :: ierr
+
+    PetscCallA(PetscInitialize(ierr))
+    print *, ierr
+    
+    PetscCallA(PetscFinalize(ierr))
+    print *, ierr
+
+end program
+</code></pre>
+<p>Note que o caminho do <code>#include</code> é passado relativo a diretório que foi indicado pela flag <code>-I</code>.</p>
+<p>Compilando com o as flags necessárias e rodando com 1 slot do mpi, esperamos encontrar:</p>
+<pre><code class="language-shell">$ fpm run minimal --runner &quot;mpirun -n 1&quot;
+           0
+           0
+
+</code></pre>
+<p>O que indica nenhum erro. Vale lembrar que o MPI também foi linkado durente a compilacão.</p>
+<h2>Uso geral da biblioteca</h2>
+<p>Antes de partirmos para um exemplo basico, vamos listar alguns pontos importantes referentes a utilização da biblioteca em um código Fortran comparado ao equivalente em C:</p>
+<ol>
+<li>Declaracãoes que não são dos tipos <code>PetscReal</code> e <code>PetscInt</code> podem ser declaradas de duas formas equivalentes:</li>
+</ol>
+<pre><code class="language-f90">type(tXXX) :: b
+! ou de forma equivalente 
+XXX b
+</code></pre>
+<p>O segundo caso utiliza uma macro definida pelo cabeçalho. Por exemplo, um vetor pode ser definido como:</p>
+<pre><code class="language-f90">type(tVec) :: x
+! ou de forma equivalente 
+PetscVec x
+</code></pre>
+<ol start="2">
+<li>No caso de variáveis com tipo <code>PetscReal</code> e <code>PetscInt</code>, a macro resove para um tipo nativo do Fortran, como <code>real(8)</code> por exemplo. Nestes casos, só a segunda alternativa é possível.</li>
+<li>Todas as subrotinas seguem o mesmo nome que a declaração em C mas ao invés de retornarem um inteiro com o código de erro, elas recebem esta variavel como último argumento. Por exemplo, a função <code>int PetscInitialize()</code> em Fortran tem a assinatura <code>PetscFinalize(int)</code>. Para evitar a escrita de uma condicional checando a variável de erro depois de toda chamada de funcão, a macro <code>PetscCall</code> implementa esta checagem:</li>
+</ol>
+<pre><code class="language-shell">$ grep -r &quot;define PetscCall&quot; include/petsc/finclude/*.h
+include/petsc/finclude/petscsysbase.h:#define PetscCall(func) call func; CHKERRQ(ierr)
+</code></pre>
+<p>A outra macro <code>CHKERRQ</code> simplesmente formata o erro e retorna:</p>
+<pre><code class="language-shell">$ grep -r &quot;define CHKERRQ&quot; include/petsc/finclude/*.h
+include/petsc/finclude/petscsysbase.h:#define CHKERRQ(ierr) if (ierr .ne. 0) then;call PetscErrorF(ierr,__LINE__,__FILE__);return;endif
+</code></pre>
+<p>No programa principal, deve-se utilizar <code>PetscCallA</code> que ao invés de retornar quando o erro é não nulo, aborta o MPI.</p>
+<ol start="4">
+<li>Os módulo que importamos são gerados automaticamente e definem as subrotinas como genéricas. Como as mensagens de erro do gfortran para rotinas genéricas são horriveis, isto dificulta um bocado o processo de descobrir qual parametro da subroutina está sendo passado errado. Um exemplo:</li>
+</ol>
+<pre><code class="language-shell">   37 |     PetscCallA(VecDuplicate(x, b, ierr))
+      |                                  1
+Error: There is no specific subroutine for the generic ‘vecduplicate’ at (1)
+</code></pre>
+<p>Significa que algum destes argumentos esta errado. Se vire pra descrobir qual.</p>
+<ol start="5">
+<li>Como arrays em C são simplemesmente ponteiros com uma informação de tamanho, rotinas que aceitam arrays são compativeis com escalares passados por referencia. Em Fortran, mesmo que queiremos, por exemplo, inserir um único valor em uma matriz, precisamos passar este valor como um array, da forma <code>PetscMatSet(..., [valor], ...)</code>.</li>
+</ol>
+<h2>Resolvendo um sistema linear</h2>
+<p>Vamos resolver o sistema <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>A</mi><mi>x</mi><mo>=</mo><mi>b</mi></mrow><annotation encoding="application/x-tex">Ax = b</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal">A</span><span class="mord mathnormal">x</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal">b</span></span></span></span> como um caso teste:</p>
+<p><div><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>A</mi><mo>=</mo><mrow><mo fence="true">(</mo><mtable rowspacing="0.16em" columnalign="center center center center center" columnspacing="1em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>1</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>2</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>3</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>4</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>6</mn></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>6</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>1</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>5</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>3</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>8</mn></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>2</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>6</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>4</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>9</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>9</mn></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>1</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>3</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>8</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>3</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>4</mn></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>5</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>7</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>8</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>2</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>5</mn></mstyle></mtd></mtr></mtable><mo fence="true">)</mo></mrow><mrow><mo fence="true">(</mo><mtable rowspacing="0.16em" columnalign="center" columnspacing="1em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>1</mn></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>2</mn></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>3</mn></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>4</mn></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>5</mn></mstyle></mtd></mtr></mtable><mo fence="true">)</mo></mrow><mo>=</mo><mrow><mo fence="true">(</mo><mtable rowspacing="0.16em" columnalign="center" columnspacing="1em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>60</mn></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>75</mn></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>107</mn></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>63</mn></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>76</mn></mstyle></mtd></mtr></mtable><mo fence="true">)</mo></mrow></mrow><annotation encoding="application/x-tex">
+A = \begin{pmatrix}
+1 &amp; 2 &amp; 3 &amp; 4 &amp; 6 \\
+6 &amp; 1 &amp; 5 &amp; 3 &amp; 8 \\
+2 &amp; 6 &amp; 4 &amp; 9 &amp; 9 \\
+1 &amp; 3 &amp; 8 &amp; 3 &amp; 4 \\
+5 &amp; 7 &amp; 8 &amp; 2 &amp; 5
+\end{pmatrix}
+\begin{pmatrix} 1 \\ 2 \\ 3 \\ 4 \\ 5 \end{pmatrix}
+=\begin{pmatrix} 60 \\ 75 \\ 107 \\ 63 \\ 76 \end{pmatrix}
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal">A</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:6em;vertical-align:-2.75em;"></span><span class="minner"><span class="mopen"><span class="delimsizing mult"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:3.25em;"><span style="top:-5.25em;"><span class="pstrut" style="height:8em;"></span><span style="width:0.875em;height:6.000em;"><svg xmlns="http://www.w3.org/2000/svg" width="0.875em" height="6.000em" viewBox="0 0 875 6000"><path d="M863,9c0,-2,-2,-5,-6,-9c0,0,-17,0,-17,0c-12.7,0,-19.3,0.3,-20,1
+c-5.3,5.3,-10.3,11,-15,17c-242.7,294.7,-395.3,682,-458,1162c-21.3,163.3,-33.3,349,
+-36,557 l0,2484c0.2,6,0,26,0,60c2,159.3,10,310.7,24,454c53.3,528,210,
+949.7,470,1265c4.7,6,9.7,11.7,15,17c0.7,0.7,7,1,19,1c0,0,18,0,18,0c4,-4,6,-7,6,-9
+c0,-2.7,-3.3,-8.7,-10,-18c-135.3,-192.7,-235.5,-414.3,-300.5,-665c-65,-250.7,-102.5,
+-544.7,-112.5,-882c-2,-104,-3,-167,-3,-189
+l0,-2492c0,-162.7,5.7,-314,17,-454c20.7,-272,63.7,-513,129,-723c65.3,
+-210,155.3,-396.3,270,-559c6.7,-9.3,10,-15.3,10,-18z"/></svg></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:2.75em;"><span></span></span></span></span></span></span><span class="mord"><span class="mtable"><span class="col-align-c"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:3.25em;"><span style="top:-5.41em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">1</span></span></span><span style="top:-4.21em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">6</span></span></span><span style="top:-3.01em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">2</span></span></span><span style="top:-1.81em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">1</span></span></span><span style="top:-0.61em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">5</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:2.75em;"><span></span></span></span></span></span><span class="arraycolsep" style="width:0.5em;"></span><span class="arraycolsep" style="width:0.5em;"></span><span class="col-align-c"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:3.25em;"><span style="top:-5.41em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">2</span></span></span><span style="top:-4.21em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">1</span></span></span><span style="top:-3.01em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">6</span></span></span><span style="top:-1.81em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">3</span></span></span><span style="top:-0.61em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">7</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:2.75em;"><span></span></span></span></span></span><span class="arraycolsep" style="width:0.5em;"></span><span class="arraycolsep" style="width:0.5em;"></span><span class="col-align-c"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:3.25em;"><span style="top:-5.41em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">3</span></span></span><span style="top:-4.21em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">5</span></span></span><span style="top:-3.01em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">4</span></span></span><span style="top:-1.81em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">8</span></span></span><span style="top:-0.61em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">8</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:2.75em;"><span></span></span></span></span></span><span class="arraycolsep" style="width:0.5em;"></span><span class="arraycolsep" style="width:0.5em;"></span><span class="col-align-c"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:3.25em;"><span style="top:-5.41em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">4</span></span></span><span style="top:-4.21em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">3</span></span></span><span style="top:-3.01em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">9</span></span></span><span style="top:-1.81em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">3</span></span></span><span style="top:-0.61em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:2.75em;"><span></span></span></span></span></span><span class="arraycolsep" style="width:0.5em;"></span><span class="arraycolsep" style="width:0.5em;"></span><span class="col-align-c"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:3.25em;"><span style="top:-5.41em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">6</span></span></span><span style="top:-4.21em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">8</span></span></span><span style="top:-3.01em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">9</span></span></span><span style="top:-1.81em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">4</span></span></span><span style="top:-0.61em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">5</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:2.75em;"><span></span></span></span></span></span></span></span><span class="mclose"><span class="delimsizing mult"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:3.25em;"><span style="top:-5.25em;"><span class="pstrut" style="height:8em;"></span><span style="width:0.875em;height:6.000em;"><svg xmlns="http://www.w3.org/2000/svg" width="0.875em" height="6.000em" viewBox="0 0 875 6000"><path d="M76,0c-16.7,0,-25,3,-25,9c0,2,2,6.3,6,13c21.3,28.7,42.3,60.3,
+63,95c96.7,156.7,172.8,332.5,228.5,527.5c55.7,195,92.8,416.5,111.5,664.5
+c11.3,139.3,17,290.7,17,454c0,28,1.7,43,3.3,45l0,2409
+c-3,4,-3.3,16.7,-3.3,38c0,162,-5.7,313.7,-17,455c-18.7,248,-55.8,469.3,-111.5,664
+c-55.7,194.7,-131.8,370.3,-228.5,527c-20.7,34.7,-41.7,66.3,-63,95c-2,3.3,-4,7,-6,11
+c0,7.3,5.7,11,17,11c0,0,11,0,11,0c9.3,0,14.3,-0.3,15,-1c5.3,-5.3,10.3,-11,15,-17
+c242.7,-294.7,395.3,-681.7,458,-1161c21.3,-164.7,33.3,-350.7,36,-558
+l0,-2544c-2,-159.3,-10,-310.7,-24,-454c-53.3,-528,-210,-949.7,
+-470,-1265c-4.7,-6,-9.7,-11.7,-15,-17c-0.7,-0.7,-6.7,-1,-18,-1z"/></svg></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:2.75em;"><span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="minner"><span class="mopen"><span class="delimsizing mult"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:3.25em;"><span style="top:-5.25em;"><span class="pstrut" style="height:8em;"></span><span style="width:0.875em;height:6.000em;"><svg xmlns="http://www.w3.org/2000/svg" width="0.875em" height="6.000em" viewBox="0 0 875 6000"><path d="M863,9c0,-2,-2,-5,-6,-9c0,0,-17,0,-17,0c-12.7,0,-19.3,0.3,-20,1
+c-5.3,5.3,-10.3,11,-15,17c-242.7,294.7,-395.3,682,-458,1162c-21.3,163.3,-33.3,349,
+-36,557 l0,2484c0.2,6,0,26,0,60c2,159.3,10,310.7,24,454c53.3,528,210,
+949.7,470,1265c4.7,6,9.7,11.7,15,17c0.7,0.7,7,1,19,1c0,0,18,0,18,0c4,-4,6,-7,6,-9
+c0,-2.7,-3.3,-8.7,-10,-18c-135.3,-192.7,-235.5,-414.3,-300.5,-665c-65,-250.7,-102.5,
+-544.7,-112.5,-882c-2,-104,-3,-167,-3,-189
+l0,-2492c0,-162.7,5.7,-314,17,-454c20.7,-272,63.7,-513,129,-723c65.3,
+-210,155.3,-396.3,270,-559c6.7,-9.3,10,-15.3,10,-18z"/></svg></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:2.75em;"><span></span></span></span></span></span></span><span class="mord"><span class="mtable"><span class="col-align-c"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:3.25em;"><span style="top:-5.41em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">1</span></span></span><span style="top:-4.21em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">2</span></span></span><span style="top:-3.01em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">3</span></span></span><span style="top:-1.81em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">4</span></span></span><span style="top:-0.61em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">5</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:2.75em;"><span></span></span></span></span></span></span></span><span class="mclose"><span class="delimsizing mult"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:3.25em;"><span style="top:-5.25em;"><span class="pstrut" style="height:8em;"></span><span style="width:0.875em;height:6.000em;"><svg xmlns="http://www.w3.org/2000/svg" width="0.875em" height="6.000em" viewBox="0 0 875 6000"><path d="M76,0c-16.7,0,-25,3,-25,9c0,2,2,6.3,6,13c21.3,28.7,42.3,60.3,
+63,95c96.7,156.7,172.8,332.5,228.5,527.5c55.7,195,92.8,416.5,111.5,664.5
+c11.3,139.3,17,290.7,17,454c0,28,1.7,43,3.3,45l0,2409
+c-3,4,-3.3,16.7,-3.3,38c0,162,-5.7,313.7,-17,455c-18.7,248,-55.8,469.3,-111.5,664
+c-55.7,194.7,-131.8,370.3,-228.5,527c-20.7,34.7,-41.7,66.3,-63,95c-2,3.3,-4,7,-6,11
+c0,7.3,5.7,11,17,11c0,0,11,0,11,0c9.3,0,14.3,-0.3,15,-1c5.3,-5.3,10.3,-11,15,-17
+c242.7,-294.7,395.3,-681.7,458,-1161c21.3,-164.7,33.3,-350.7,36,-558
+l0,-2544c-2,-159.3,-10,-310.7,-24,-454c-53.3,-528,-210,-949.7,
+-470,-1265c-4.7,-6,-9.7,-11.7,-15,-17c-0.7,-0.7,-6.7,-1,-18,-1z"/></svg></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:2.75em;"><span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:6em;vertical-align:-2.75em;"></span><span class="minner"><span class="mopen"><span class="delimsizing mult"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:3.25em;"><span style="top:-5.25em;"><span class="pstrut" style="height:8em;"></span><span style="width:0.875em;height:6.000em;"><svg xmlns="http://www.w3.org/2000/svg" width="0.875em" height="6.000em" viewBox="0 0 875 6000"><path d="M863,9c0,-2,-2,-5,-6,-9c0,0,-17,0,-17,0c-12.7,0,-19.3,0.3,-20,1
+c-5.3,5.3,-10.3,11,-15,17c-242.7,294.7,-395.3,682,-458,1162c-21.3,163.3,-33.3,349,
+-36,557 l0,2484c0.2,6,0,26,0,60c2,159.3,10,310.7,24,454c53.3,528,210,
+949.7,470,1265c4.7,6,9.7,11.7,15,17c0.7,0.7,7,1,19,1c0,0,18,0,18,0c4,-4,6,-7,6,-9
+c0,-2.7,-3.3,-8.7,-10,-18c-135.3,-192.7,-235.5,-414.3,-300.5,-665c-65,-250.7,-102.5,
+-544.7,-112.5,-882c-2,-104,-3,-167,-3,-189
+l0,-2492c0,-162.7,5.7,-314,17,-454c20.7,-272,63.7,-513,129,-723c65.3,
+-210,155.3,-396.3,270,-559c6.7,-9.3,10,-15.3,10,-18z"/></svg></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:2.75em;"><span></span></span></span></span></span></span><span class="mord"><span class="mtable"><span class="col-align-c"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:3.25em;"><span style="top:-5.41em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">60</span></span></span><span style="top:-4.21em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">75</span></span></span><span style="top:-3.01em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">107</span></span></span><span style="top:-1.81em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">63</span></span></span><span style="top:-0.61em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">76</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:2.75em;"><span></span></span></span></span></span></span></span><span class="mclose"><span class="delimsizing mult"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:3.25em;"><span style="top:-5.25em;"><span class="pstrut" style="height:8em;"></span><span style="width:0.875em;height:6.000em;"><svg xmlns="http://www.w3.org/2000/svg" width="0.875em" height="6.000em" viewBox="0 0 875 6000"><path d="M76,0c-16.7,0,-25,3,-25,9c0,2,2,6.3,6,13c21.3,28.7,42.3,60.3,
+63,95c96.7,156.7,172.8,332.5,228.5,527.5c55.7,195,92.8,416.5,111.5,664.5
+c11.3,139.3,17,290.7,17,454c0,28,1.7,43,3.3,45l0,2409
+c-3,4,-3.3,16.7,-3.3,38c0,162,-5.7,313.7,-17,455c-18.7,248,-55.8,469.3,-111.5,664
+c-55.7,194.7,-131.8,370.3,-228.5,527c-20.7,34.7,-41.7,66.3,-63,95c-2,3.3,-4,7,-6,11
+c0,7.3,5.7,11,17,11c0,0,11,0,11,0c9.3,0,14.3,-0.3,15,-1c5.3,-5.3,10.3,-11,15,-17
+c242.7,-294.7,395.3,-681.7,458,-1161c21.3,-164.7,33.3,-350.7,36,-558
+l0,-2544c-2,-159.3,-10,-310.7,-24,-454c-53.3,-528,-210,-949.7,
+-470,-1265c-4.7,-6,-9.7,-11.7,-15,-17c-0.7,-0.7,-6.7,-1,-18,-1z"/></svg></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:2.75em;"><span></span></span></span></span></span></span></span></span></span></span></span></div></p>
+<p>O código é auto descritivo, vamos listar alguns comentarios depois:</p>
+<pre><code class="language-f90">program basic 
+
+#include &lt;petsc/finclude/petscksp.h&gt;
+    use petscksp
+    implicit none
+
+    integer(4), parameter :: n = 5
+
+    type(tVec) :: x, b
+    type(tMat) :: A
+    type(tKSP) :: ksp
+    integer :: i, its
+    integer :: ierr
+
+    real(8), dimension(n, n) :: known_A
+    real(8), dimension(n) :: known_x, known_b
+
+    ! State the problem: Ax = b
+    known_A = reshape([ &amp;
+        1, 6, 2, 1, 5, &amp;
+        2, 1, 6, 3, 7, &amp;
+        3, 5, 4, 8, 8, &amp;
+        4, 3, 9, 3, 2, &amp;
+        6, 8, 9, 4, 5  &amp;
+    ], [5,5])
+    known_x = [1, 2, 3, 4, 5]
+    known_b = MATMUL(known_A, known_x) ! [60, 75, 107, 63, 76]
+
+    ! Initialize MPI and petsc
+    PetscCallA(PetscInitialize(ierr))
+
+    ! Create the x vector and copy its settings to b
+    PetscCallA(VecCreate(PETSC_COMM_SELF, x, ierr))
+    PetscCallA(VecSetSizes(x, PETSC_DECIDE, n, ierr))
+    PetscCallA(VecSetType(x, VECSTANDARD, ierr))
+
+    PetscCallA(VecDuplicate(x, b, ierr))
+
+    ! Set b (the rhs)
+    do i = 1, n
+        PetscCallA(VecSetValues(b, 1_4, [i - 1], [known_b(i)], INSERT_VALUES, ierr))
+    end do
+
+    ! Create the A matrix
+    PetscCallA(MatCreate(PETSC_COMM_SELF, A, ierr))
+    PetscCallA(MatSetSizes(A, PETSC_DECIDE, PETSC_DECIDE, n, n, ierr))
+    PetscCallA(MatSetType(A, MATAIJ, ierr))
+
+    ! Build it
+    block
+        integer(4) :: cols(n), rows(1)
+        cols = [0, 1, 2, 3, 4]
+
+        do i = 1, n
+            rows = [i - 1]
+            PetscCallA(MatSetValues(A, 1_4, rows, n, cols, known_A(i, :), INSERT_VALUES, ierr))
+        end do
+    end block
+
+    PetscCallA(MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY, ierr))
+    PetscCallA(MatAssemblyEnd(A, MAT_FINAL_ASSEMBLY, ierr))
+
+    ! Create the solver object
+    PetscCallA(KSPCreate(PETSC_COMM_SELF, ksp, ierr));
+    PetscCallA(KSPSetOperators(ksp, A, A, ierr));
+
+    ! Set the initial value and solve it
+    PetscCallA(VecSet(x, -1.0d0, ierr))
+    PetscCallA(KSPSolve(ksp, b, x, ierr));
+
+    PetscCallA(KSPGetIterationNumber(ksp, its, ierr));
+    print *, &quot;Iterations count: &quot;, its
+    print *, &quot;X:&quot;
+    PetscCallA(VecView(x, PETSC_VIEWER_STDOUT_WORLD, ierr))
+
+    ! Finalize MPI and petsc
+    PetscCallA(PetscFinalize(ierr))
+
+end program
+</code></pre>
+<p>Basicamente, montamos um sistema em que sabemos que a solução é <code>known_x = [1.0, 2.0, 3.0, 4.0, 5.0]</code>. Com isto construímos o lado direito da equação e depois resolvemos o sistema utilizando um solucionador iterativo fingindo que não sabemos quem é <code>x</code>. É instrutivo procurar a assinatura de cada rotina utilizada e comparar com a implementação acima. Antes de verificar a saida, fazemos alguns comentários</p>
+<ol>
+<li>Selecionamos o <em>kind</em> das variaveis inteiras e reais como <code>integer(4)</code> e <code>real(8)</code> respectivamente. Esta é a configuração padrão do Petsc, poderíamos ter definido todas as variáveis utilziando <code>PetscInt</code> e <code>PetscReal</code>. Como o Petsc pode ser configurado utilizando um arquivo externo, depois da compilação, esta última alternativa seria mais portátil do que o código apresentado.</li>
+<li>Tal como as variávels, utilizamos literais com o <em>kind</em> modificado, como <code>1_4</code>. Se erramos o <em>kind</em> a compilação falhará com o erro chato de que a assinatura para o nome genérico não foi encontrada.</li>
+<li>Alguns argumentos que recebem o tamanho local de objetos receberam o argumento <code>PETSC_DECIDE</code>, isto é apenas uma conveniência para subdividir os objetos entre os processos do MPI igualmente.</li>
+<li>Por padrão, o tipo <code>tKSP</code> utiliza o GMRES restartado precondicionado com uma decomposição LU incompleta.</li>
+<li>O <code>block ... end block</code> é um construtor do Fortran 2008 que apenas nos deixa declarar algums variaveis locais ao bloco antes de executar o código dentro do block.</li>
+</ol>
+<p>Executando, vemos que o código inverte o vetor <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>X</mi></mrow><annotation encoding="application/x-tex">X</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.07847em;">X</span></span></span></span> corretamente:</p>
+<pre><code class="language-shell">$ fpm run basic --runner &quot;mpirun -n 1&quot;
+At line 56 of file app/basic.f90
+Fortran runtime warning: An array temporary was created for argument 'f' of procedure 'matsetvalues'
+ Iterations count:            1
+ X:
+Vec Object: 1 MPI process
+  type: seq
+1.
+2.
+3.
+4.
+5.
+</code></pre>
+<p>O aviso antes da execução é inofensivo e se deve ao fato que passamos um array que não é contíguo. Em Fortran os arrays são armazenados por coluna. O solucionador convergiu em uma única iteração, provavelmente pois o problema era simples o suficiente para set resolvido pelo precondicionador.</p>
+
+    </div>
+</div>
+<div id="imgModal"><img src="" alt=""></div>
+
+
+    <footer class="site-footer">
+        por Lucas de S. M.
+    </footer>
+</body>
+
+</html>

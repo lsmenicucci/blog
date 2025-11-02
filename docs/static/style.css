@@ -11,6 +11,10 @@
     --bright-red: #E94957;
 }
 
+a {
+    color: var(--red);
+}
+
 body {
     margin: 2em 18%;
     background-color: var(--white);
