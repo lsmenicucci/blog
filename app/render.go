@@ -7,12 +7,13 @@ import (
 	"strings"
 	"time"
 
+	"github.com/FurqanSoftware/goldmark-katex"
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark-meta"
 	"github.com/yuin/goldmark/parser"
 )
 
-var md = goldmark.New(goldmark.WithExtensions(meta.Meta))
+var md = goldmark.New(goldmark.WithExtensions(meta.Meta), goldmark.WithExtensions(&katex.Extender{}))
 
 type PostDate time.Time
 
